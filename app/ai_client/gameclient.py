@@ -29,7 +29,6 @@ class GameClient:
                     self.__gameEnded('It\'s a draw..')
                 case PlayerStatus.CanMove:
                     self.__makeSomeMove()
-            time.sleep(0.5)
 
     #TODO make AI move
     def __makeSomeMove(self):
@@ -58,7 +57,7 @@ class GameClient:
     
     def __gameEnded(self, message):
         print(str(message) + '. Waiting for the game to be started again..')
-        time.sleep(1)
+        time.sleep(0.1)
 
     def __initKeepAliveRequestor(self):
         thread = threading.Thread(target=self.__keepAliveRequestor, args=())

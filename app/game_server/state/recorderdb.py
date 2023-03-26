@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import pathlib
+import time
 
 from models.game import Game
 from models.move import Move
@@ -48,10 +49,10 @@ class RecorderDb:
                 VALUES(?,?,?) '''
         db = self.conn.cursor()
         try:
-            time = currentTimestamp()
-            db.execute(sql, (playerName, time, time))
+            timestamp = currentTimestamp()
+            db.execute(sql, (playerName, timestamp, timestamp))
             self.conn.commit()
-            return Player(int(db.lastrowid), playerName, time, time)
+            return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:
             print("RecorderDb: Unable to add User: "+str(e))
             return -1
@@ -80,10 +81,10 @@ class RecorderDb:
         db = self.conn.cursor()
         for attempt in range(retries):
             try:
-                time = currentTimestamp()
-                db.execute(sql, (time,int(GameStatus.Started)))
+                timestamp = currentTimestamp()
+                db.execute(sql, (timestamp,int(GameStatus.Started)))
                 self.conn.commit()
-                return Game(db.lastrowid, {}, time, GameStatus.Started)
+                return Game(db.lastrowid, {}, timestamp, GameStatus.Started)
             except Error as e:
                 if "transaction" in str(e) and attempt < retries - 1:
                     # Transaction error: rollback and retry

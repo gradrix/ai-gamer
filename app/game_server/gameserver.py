@@ -60,7 +60,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
         if (self.state.hasGameEnded()):
             self.state.endGame(self.state.playersList)
 
-        if (self.state.game.status != GameStatus.Started):
+        if (self.state.game.status != GameStatus.Started or self.areEnoughPlayers() == False):
             result = PlayerStatus.Wait
         else:
             result = self.gameProgram.canMove(playerName)
@@ -117,9 +117,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
             time.sleep(1)
 
     def __syncPlayers(self):
-        print('number of players: '+str(len(self.state.playersList)))
         if (self.areEnoughPlayers() == True):
-            print('Syncing players..')
             self.gameProgram.syncPlayers(self.state.playersList)
 
 class GameServer:
@@ -146,7 +144,6 @@ class GameServer:
                 self.started = self.gameServer.startNewGame()
                 if (self.started):
                     restarting = False
-            time.sleep(1)
 
     def __rpcListener(self):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
