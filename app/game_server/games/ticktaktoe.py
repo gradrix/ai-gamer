@@ -1,9 +1,11 @@
 from array import array
 import random
+import time
 
 from models.gamebase import GameBase
-from models.enums import GameStatus, PlayerRegistration, Move
+from models.enums import PlayerStatus, PlayerRegistration, MoveStatus
 from models.player import Player
+from models.game import MoveResult
 
 E = 0 #Empty
 X = 1 #X
@@ -17,53 +19,30 @@ class TikTakToe(GameBase):
         if (min(xSize, ySize) < scoreLineLength):
             raise Exception('Error: scoreLineLength of '+str(scoreLineLength)+ ' is bigger than width ('+str(xSize)+ ') or '+
             'height ('+str(ySize)+') and therefore it is not possible to reach winning condition')
-        self.reset()
+        self.previousWinner = None
+        self.player1: Player = None
+        self.player2: Player = None
+        self.hasEnded = True
+        self.__reset()
 
     #GameBase implementation
-    def reset(self):
-        self.players = {
-            X: Player(None, GameStatus.CanMove),
-            O: Player(None, GameStatus.Wait)
-        }
-        self.startNewGame()
+    requiredNumOfPlayers: int = 2
 
-    def startNewGame(self):
-        self.grid = []
-        for y in range(0, self.ySize):
-            self.grid.insert(y, [])
-            for x in range(0, self.xSize):
-                self.grid[y].insert(x, E)
-
-        self.nextToMove = X
-
-        #Randomly change figure for player after each game
-        if (bool(random.getrandbits(1))):
-            print('Switching figures!')
-            xId = self.players[X].id
-            self.players[X].id = self.players[O].id
-            self.players[O].id = xId
+    def startNewGame(self, players: list[Player]):
+        self.__reset()
+        self.syncPlayers(players)
+    
+        if (self.player1.id == self.previousWinner):
+            self.__assignPlayerFigures(True)
+        elif (self.player2.id == self.previousWinner):
+            self.__assignPlayerFigures(False)
+        else:
+            self.__assignPlayerFigures(bool(random.getrandbits(1)))
 
         self.hasEnded = False
-        self.players[X].status = GameStatus.CanMove
-        self.players[O].status = GameStatus.Wait
-
-    def registerPlayer(self, playerId):
-        if (self.players[X].id != None and self.players[O].id != None):
-            return PlayerRegistration.NoPlayerSlotsLeft
-        elif (self.players[X].id == playerId or self.players[O].id == playerId):
-            return PlayerRegistration.AlreadyRegistered
-        else:
-            if (self.players[X].id == None and self.players[O].id == None):
-                randomIdx = random.randint(0, 1)
-                if (randomIdx == 0):
-                    self.players[O].id = playerId
-                else:
-                    self.players[X].id = playerId
-            elif (self.players[O].id == None):
-                self.players[O].id = playerId
-            else:
-                self.players[X].id = playerId
-            return PlayerRegistration.Success
+        self.player1.status = PlayerStatus.CanMove
+        self.player2.status = PlayerStatus.Wait
+        return True
 
     def getPossibleMoves(self) -> array:
         moves = []
@@ -90,46 +69,85 @@ class TikTakToe(GameBase):
             result += line[:-1] + '\n'
         return result
 
-    def canMove(self, playerId) -> GameStatus:
-        playerFigure = self.__getPlayerFigureById(playerId)
-        gameStatus = self.checkForWinner()
-        if (playerFigure == None):
-            return GameStatus.UnregisteredPlayer
-        elif (gameStatus == False):
-            if (self.stillCouldHaveWinner == False):
-                return self.__endGame(playerId, GameStatus.Draw)
-            elif (self.nextToMove != playerFigure):
-                return GameStatus.Wait
-            else:
-                return GameStatus.CanMove
-        elif (gameStatus == playerFigure):
-            return self.__endGame(playerId, GameStatus.Won)
-        else:
-            return self.__endGame(playerId, GameStatus.Lost)
+    def canMove(self, playerName) -> PlayerStatus:
+        playerFigure = self.__getPlayerFigureByName(playerName)
+        playerStatus = self.checkForWinner()
+        player = self.__getPlayerByName(playerName)
 
-    def move(self, playerId, index) -> Move:
-        playerFigure = self.__getPlayerFigureById(playerId)
+        if (playerFigure == None):
+            if (self.hasEnded == True and player != None):
+                return PlayerStatus.Wait
+            else:
+                return PlayerStatus.UnregisteredPlayer
+        elif (playerStatus == False):
+            if (self.stillCouldHaveWinner == False):
+                return self.__endGame(player, PlayerStatus.Draw)
+            elif (self.nextToMove != playerFigure):
+                return PlayerStatus.Wait
+            else:
+                return PlayerStatus.CanMove
+        elif (playerStatus == playerFigure):
+            return self.__endGame(player, PlayerStatus.Won)
+        else:
+            return self.__endGame(player, PlayerStatus.Lost)
+
+    def move(self, playerName, index):
+        playerFigure = self.__getPlayerFigureByName(playerName)
 
         if (self.hasEnded or playerFigure == None or self.nextToMove != playerFigure):
-            return Move.Error
+            return MoveResult(MoveStatus.Error, None)
         else:
             possibleMoves = self.getPossibleMoves()
             (x, y) = possibleMoves[index]
             if (self.placeFigure(x, y, playerFigure)):
                 if (playerFigure == X):
+                    symbol = 'X'
                     self.nextToMove = O
                 else:
+                    symbol = 'O'
                     self.nextToMove = X
-                return Move.Success
+                moveStr = symbol + ' -> X:' +str(x)+ ',Y:'+str(y)
+                return MoveResult(MoveStatus.Success, moveStr)
             else:
-                return Move.Incorrect
+                return MoveResult(MoveStatus.Incorrect, None)
+            
+    def syncPlayers(self, players: list[Player]):
+        def getPlayer(player: Player):
+            return  (None, None) if player is None else (player.refid, player.name)
 
-    def getPlayerStatuses(self) -> array:
-        result = []
-        for player in self.players.values():
-            result.append(player.status)
-        return result
+        def syncFigure(oponentsName: str, newName: str):
+            figure = self.__getPlayerFigureByName(oponentsName)
+            if (figure != None):
+                isX = True if figure is X else False
+                if (isX): 
+                    self.figureMap[O] = newName
+                else:
+                    self.figureMap[X] = newName
+
+        (pl1Ref, pl1Name) = getPlayer(players[0])
+        (pl2Ref, pl2Name) =  getPlayer(players[1])
+        (existing1Ref, existing1Name) = getPlayer(self.player1)
+        (existing2Ref, existing2Name) = getPlayer(self.player2)
+
+        #swap if needed
+        if ((pl1Ref != None and pl1Ref == existing2Ref) or 
+                (pl2Ref != None and pl2Ref == existing1Ref)):
+            player1 = self.player1
+            self.player1 = self.player2
+            self.player2 = player1
+
+        if (pl1Ref != None and pl1Ref != existing1Ref):
+            self.player1 = players[0]
+            syncFigure(existing2Name, pl1Name)
+
+        if (pl2Ref != None and pl2Ref != existing2Ref):
+            self.player2 = players[1]
+            syncFigure(existing1Name, pl2Name)
     #end
+
+    def getPl(self, players: list[Player], refId: str):
+        maybePlayer = [player for player in players if player.refid == refId]
+        return maybePlayer[0] if maybePlayer else None
 
     def placeFigure(self, x, y, figure) -> bool:
         if ((x < 0 or x > self.xSize - 1 or y < 0 or y > self.ySize - 1) or
@@ -204,10 +222,21 @@ class TikTakToe(GameBase):
 
         return False
 
-    def __endGame(self, playerId, endStatus):
-        playerFigure = self.__getPlayerFigureById(playerId)
+    def __reset(self):
+        self.figureMap = {
+            X: None,
+            O: None
+        }
+        self.grid = []
+        for y in range(0, self.ySize):
+            self.grid.insert(y, [])
+            for x in range(0, self.xSize):
+                self.grid[y].insert(x, E)
+        self.nextToMove = X
+
+    def __endGame(self, player: Player, endStatus: PlayerStatus):
         self.hasEnded = True        
-        self.players[playerFigure].status = endStatus
+        player.status = endStatus
         return endStatus
 
     def __clearAllScores(self, score):
@@ -239,9 +268,26 @@ class TikTakToe(GameBase):
         score["prev"] = newFigure
         return None
 
-    def __getPlayerFigureById(self, playerId):
-        figureMap = list(self.players.keys())
-        for i, player in enumerate(self.players.values()):
-            if (player.id == playerId):
-                return figureMap[i]
+    def __assignPlayerFigures(self, player1IsFirst: bool):
+        if (player1IsFirst):
+            self.figureMap[X] = self.player1.name
+            self.figureMap[O] = self.player2.name
+        else:
+            self.figureMap[X] = self.player1.name
+            self.figureMap[O] = self.player2.name
+
+    #TODO: move outside
+    def __getPlayerByName(self, playerName: str):
+        if (self.player1 != None and self.player1.name == playerName):
+            return self.player1
+        elif (self.player2 != None and self.player2.name == playerName):
+            return self.player2
+        else:
+            return None
+
+    def __getPlayerFigureByName(self, playerName: str):
+        figures = list(self.figureMap.keys())
+        for i, figPlayerName in enumerate(self.figureMap.values()):
+            if (figPlayerName == playerName):
+                return figures[i]
         return None

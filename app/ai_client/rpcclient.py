@@ -1,29 +1,47 @@
 from array import array
-from jsonrpclib import Server
+import grpc
+
+from rpc import gameapi_pb2_grpc, gameapi_pb2
+import common.rpc.codec as codec
 
 class GameEngineRpcClient:
 
     def __init__(self, host, port):
-        self.client = Server('http://'+str(host)+':'+str(port))
+        self.host = host
+        self.server_port = int(port)
 
-    def register(self, playerId):
-        print('Registering player with '+playerId)
-        return self.client.registerPlayer(playerId)
+        # instantiate a channel
+        self.channel = grpc.insecure_channel('{}:{}'.format(self.host, self.server_port))
+
+        # bind the client and the server
+        self.stub = gameapi_pb2_grpc.GameApiStub(self.channel)
+
+    def registerPlayer(self, playerName: str):
+        request = codec.encodePlayerNameRequest(playerName)
+        print('Registering player with '+playerName)
+        result = self.stub.registerPlayer(request)
+        return codec.decodeRegisterPlayerResponse(result)
 
     def getPossibleMoves(self) -> array:
-        return self.client.getPossibleMoves()
+        result = self.stub.getPossibleMoves(gameapi_pb2.GetPossibleMovesRequest())
+        return codec.decodeGetPossibleMovesResponse(result)
 
     def getCurrentBoard(self):
-        return self.client.getCurrentBoard()
+        result = self.stub.getCurrentBoard(gameapi_pb2.GetCurrentBoardRequest())
+        return codec.decodeGetCurrentBoardResponse(result)
 
-    def canMove(self, playerId):
-        return self.client.canMove(playerId)
+    def canMove(self, playerName):
+        request = codec.encodePlayerNameRequest(playerName)
+        result = self.stub.canMove(request)
+        return codec.decodeCanMoveResponse(result)
 
-    def move(self, playerId, index):
-        return self.client.move(playerId, index)
-        
-    def registerPlayer(self, par):
-        return self.client.registerPlayer(par)
+    def move(self, playerName, index):
+        request = codec.encodeMoveRequest(playerName, index)
+        result = self.stub.move(request)
+        return codec.decodeMoveResponse(result)
 
-    def isAlive(self, playerId):
-        return self.client.isAlive(playerId)
+    def keepAlive(self, playerName):
+        request = codec.encodePlayerNameRequest(playerName)
+        self.stub.keepAlive(request)
+        return
+ 

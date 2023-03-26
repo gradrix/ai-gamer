@@ -2,31 +2,34 @@
 import random
 import uuid
 import time
+import threading
 
 from ai_client.rpcclient import GameEngineRpcClient
-from models.enums import GameStatus, Move, PlayerRegistration
+from models.enums import PlayerStatus, MoveStatus, PlayerRegistration
 
 class GameClient:
 
     def __init__(self, host, port):
         self.client = GameEngineRpcClient(host, port)
+        self.playerId = 'ai-' +str(uuid.uuid4())
+        self.__initKeepAliveRequestor()
         self.__register()
 
     def start(self):
         while True:
             canMove = self.client.canMove(self.playerId)
             match canMove:
-                case GameStatus.UnregisteredPlayer:
-                    self.register()
-                case GameStatus.Won:
+                case PlayerStatus.UnregisteredPlayer:
+                    self.__register()
+                case PlayerStatus.Won:
                     self.__gameEnded('I\'ve won!')
-                case GameStatus.Lost:
+                case PlayerStatus.Lost:
                     self.__gameEnded('I\'ve lost :-/')
-                case GameStatus.Draw:
+                case PlayerStatus.Draw:
                     self.__gameEnded('It\'s a draw..')
-                case GameStatus.CanMove:
+                case PlayerStatus.CanMove:
                     self.__makeSomeMove()
-            time.sleep(1)
+            time.sleep(0.5)
 
     #TODO make AI move
     def __makeSomeMove(self):
@@ -35,27 +38,34 @@ class GameClient:
 
         #pick random move
         moveResult = None
-        while (moveResult != Move.Error and moveResult != Move.Success):
+        while (moveResult != MoveStatus.Error and moveResult != MoveStatus.Success):
             move = random.randint(0, len(possibleMoves) - 1)
-            moveResult = self.client.move(self.playerId, move)        
+            moveResult = self.client.move(self.playerId, move).status
+            if (moveResult == MoveStatus.Success):
+                mv = possibleMoves[move]
+                print('I\'m moving to: '+str(mv[0])+':'+str(mv[1]))
     
     def __register(self) -> bool:
-        self.__generateNewId()
-        registration = self.client.register(self.playerId)
+        registration = self.client.registerPlayer(self.playerId)
         match registration:
             case PlayerRegistration.NoPlayerSlotsLeft:
                 raise Exception('No free player slots availabe - won\'t be able to participate..')
             case PlayerRegistration.AlreadyRegistered:
-                print('Already registered.. I shouldn\'t be trying this..')
+                print('Logging in as already registered '+self.playerId)
                 return True
             case _:
                 return True
-
-    def __generateNewId(self):
-        self.playerId = 'ai-' +str(uuid.uuid4())
     
     def __gameEnded(self, message):
         print(str(message) + '. Waiting for the game to be started again..')
         time.sleep(1)
 
-    
+    def __initKeepAliveRequestor(self):
+        thread = threading.Thread(target=self.__keepAliveRequestor, args=())
+        thread.daemon = True
+        thread.start()
+
+    def __keepAliveRequestor(self):
+        while True:
+            self.client.keepAlive(self.playerId)
+            time.sleep(2)

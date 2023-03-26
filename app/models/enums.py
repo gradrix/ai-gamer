@@ -1,24 +1,26 @@
 from enum import IntEnum
 
-class Mode(IntEnum):
-    Console = 1 #Both players control game via console
-    Mixed = 2 #Console player vs RPC player
-    Rpc = 3 # Both players control game via rpc
-
 class PlayerRegistration(IntEnum):
-    Success = 1
-    NoPlayerSlotsLeft = 2
-    AlreadyRegistered = 3
+    Success = 0
+    NoPlayerSlotsLeft = 1
+    AlreadyRegistered = 2
 
-class Move(IntEnum):
-    Success = 1
-    Incorrect = 2
-    Error = 3
+class MoveStatus(IntEnum):
+    Success = 0
+    Incorrect = 1
+    Error = 2
+
+class PlayerStatus(IntEnum):
+    Won = 0
+    Lost = 1
+    Draw = 2
+    CanMove = 3
+    Wait = 4
+    UnregisteredPlayer = 5
 
 class GameStatus(IntEnum):
-    Won = 1
-    Lost = 2
-    Draw = 3
-    CanMove = 4
-    Wait = 5
-    UnregisteredPlayer = 6
+    Created = 0
+    Started = 1
+    Ended = 2
+    EndedDraw = 3
+    Aborted = 4

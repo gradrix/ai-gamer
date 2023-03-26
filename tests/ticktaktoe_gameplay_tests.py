@@ -3,7 +3,7 @@ import sys, os
 
 sys.path.append(os.path.abspath('./app'))
 from game_server.games.ticktaktoe import TikTakToe, E, X, O
-from models.enums import GameStatus, PlayerRegistration
+from models.enums import PlayerStatus, PlayerRegistration
 
 def createTickTakToe(x = 10, y = 10, scoreLine = 5):
     return TikTakToe(x, y, scoreLine)

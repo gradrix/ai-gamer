@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Main",
+            "name": "Run: Server",
             "type": "python",
             "request": "launch",
-            "program": "app/main.py",
+            "program": "start-server.py",
+            "cwd": "${workspaceFolder}/app",
             "console": "integratedTerminal"
-        },
+        },        
         {
-            "name": "Python: Module",
+            "name": "Run: Client",
             "type": "python",
             "request": "launch",
-            "module": "pytest",
-            "args": [
-                "./test/**"
-            ]
-        },
+            "program": "start-client.py",
+            "cwd": "${workspaceFolder}/app",
+            "console": "integratedTerminal"
+        }
     ]
 }

@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+service GameApi {
+    rpc registerPlayer(PlayerNameRequest) returns (RegisterPlayerResponse) {}
+
+    rpc getPossibleMoves(GetPossibleMovesRequest) returns (GetPossibleMovesResponse) {}
+
+    rpc getCurrentBoard(GetCurrentBoardRequest) returns (GetCurrentBoardResponse) {}
+
+    rpc canMove(PlayerNameRequest) returns (CanMoveResponse) {}
+
+    rpc move(MoveRequest) returns (MoveResponse) {}
+
+    rpc keepAlive(PlayerNameRequest) returns (KeepAliveResponse) {}
+ }
+
+message PlayerNameRequest {
+    string playerName = 1;
+}
+
+message RegisterPlayerResponse {
+    PlayerRegistration registrationStatus = 1;
+}
+
+enum PlayerRegistration {
+    REGISTRATION_SUCCESS = 0;
+    NO_PLAYER_SLOT_LEFT = 1;
+    ALREADY_REGISTERED = 2;
+}
+
+message GetPossibleMovesRequest {}
+
+message GetPossibleMovesResponse {
+    repeated MoveCoordinates moves = 1;
+}
+
+message MoveCoordinates {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message GetCurrentBoardRequest {}
+
+message GetCurrentBoardResponse {
+    repeated BoardRow grid = 1;
+}
+
+message BoardRow {
+    repeated int32 items = 1;
+}
+
+message CanMoveResponse {
+    PlayerStatus playerStatus = 1; 
+}
+
+enum PlayerStatus {
+    WON = 0;
+    LOST = 1;
+    DRAW = 2;
+    CAN_MOVE = 3;
+    WAIT = 4;
+    UNREGISTERED_PLAYER = 5;
+}
+
+message MoveRequest {
+    string playerName = 1;
+    int32 index = 2;
+}
+
+message MoveResponse {
+    MoveStatus status = 1;
+    string move = 2;
+}
+
+enum MoveStatus {
+    MOVE_SUCCESS = 0;
+    INCORRECT = 1;
+    ERROR = 2;
+}
+
+message KeepAliveResponse {}

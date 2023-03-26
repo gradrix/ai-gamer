@@ -1,22 +1,18 @@
-from abc import ABC, abstractmethod
-
-from models.enums import Move
+from abc import ABCMeta, abstractmethod, abstractproperty
+from models.game import MoveResult
+from models.player import Player
 
 # ------------------------------ #
 #     Abstract class of games    #
 # ------------------------------ #
-class GameBase(ABC):
+class GameBase(metaclass=ABCMeta):
 
-    @abstractmethod
-    def reset(self):
+    @abstractproperty
+    def requiredNumOfPlayers(self) -> int:
         pass
 
     @abstractmethod
-    def startNewGame(self):
-        pass
-
-    @abstractmethod
-    def registerPlayer(self, playerId):
+    def startNewGame(self, players: list[Player]):
         pass
 
     #Return array of not correct moves but theoretically possible moves
@@ -41,6 +37,7 @@ class GameBase(ABC):
     def move(self, playerId, index):
         pass
           
+    #Syncs players
     @abstractmethod
-    def getPlayerStatuses(self) -> Move:
+    def syncPlayers(self, players: list[Player]):
         pass

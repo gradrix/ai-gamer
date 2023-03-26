@@ -2,7 +2,7 @@ import sys, os
 
 sys.path.append(os.path.abspath('./app'))
 from game_server.games.ticktaktoe import TikTakToe
-from models.enums import GameStatus, PlayerRegistration
+from models.enums import PlayerStatus, PlayerRegistration
 
 def createTickTakToe(x = 10, y = 10, scoreLine = 5):
     return TikTakToe(x, y, scoreLine)
@@ -14,7 +14,7 @@ def test_register_player():
     status = game.canMove('Bronny')
 
     assert registrationResult == PlayerRegistration.Success
-    assert status == GameStatus.CanMove or status == GameStatus.Wait
+    assert status == PlayerStatus.CanMove or status == PlayerStatus.Wait
 
 def test_register_player_twice_should_error():
     game = createTickTakToe(3, 3, 3)
@@ -38,6 +38,6 @@ def test_gets_player_statuses():
     game.registerPlayer('Bronny')
     game.registerPlayer('Bill')
     statuses = game.getPlayerStatuses()
-    assert GameStatus.CanMove in statuses
-    assert GameStatus.Wait in statuses
+    assert PlayerStatus.CanMove in statuses
+    assert PlayerStatus.Wait in statuses
     

@@ -1,8 +1,19 @@
+import uuid
 from dataclasses import dataclass
 
-from models.enums import GameStatus
+from models.enums import PlayerStatus
 
 @dataclass
 class Player:
-    id: str
-    status: GameStatus
+    id: int
+    name: str
+    createddate: int
+    lastonline: int
+    status: PlayerStatus = PlayerStatus.Wait
+
+    def __post_init__(self):
+        self.refid = str(uuid.uuid4())
+
+    def __str__(self):
+        return str(self.name)+'->'+str(self.id)
+    

@@ -1,7 +1,6 @@
 #!python
-from game_server.gamemanager import GameManager
+from game_server.gameserver import GameServer
 from game_server.games.ticktaktoe import TikTakToe
-from models.enums import Mode
 
-engine = GameManager(Mode.Mixed, TikTakToe(3, 3, 3))
-engine.start()
+server = GameServer(TikTakToe(10, 10, 5))
+server.start()

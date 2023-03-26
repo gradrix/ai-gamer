@@ -1,6 +1,6 @@
 import time
 
-from models.enums import GameStatus, Mode, Move
+from models.enums import PlayerStatus, MoveStatus
 
 class ConsoleController:
 
@@ -22,19 +22,19 @@ class ConsoleController:
             for i in range(0, self.cmdPlayers):
                 player = self.players[i]
                 match self.game.canMove(player):
-                    case GameStatus.UnregisteredPlayer:
+                    case PlayerStatus.UnregisteredPlayer:
                         alreadyEnded[i] = False
                         self.__register(i)
-                    case GameStatus.Draw if alreadyEnded[i] == False:
+                    case PlayerStatus.Draw if alreadyEnded[i] == False:
                         print('Game has ended because it is Draw!')
                         alreadyEnded[i] = True
-                    case GameStatus.Lost if alreadyEnded[i] == False:
+                    case PlayerStatus.Lost if alreadyEnded[i] == False:
                         print('Game has ended. Player #'+str(i + 1)+' ('+str(player)+') lost.. :-/')
                         alreadyEnded[i] = True
-                    case GameStatus.Won if alreadyEnded[i] == False:
+                    case PlayerStatus.Won if alreadyEnded[i] == False:
                         print('Game has ended. Player #'+str(i + 1)+' ('+str(player)+') won! :-)')
                         alreadyEnded[i] = True
-                    case GameStatus.CanMove:
+                    case PlayerStatus.CanMove:
                         alreadyEnded[1] = False
                         board = self.game.getCurrentBoardString()
                         possibleMoves = self.game.getPossibleMoves()
