@@ -22,6 +22,9 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     def __init__(self, gameProgram):
         self.state = GameStateManager()
         self.gameProgram: GameBase = gameProgram
+        self.restarting = False
+        self.startNewGame()
+        self.__checkForGameStatus()
         self.__initPlayerConnectionChecker()
 
     #gRPC methods
@@ -55,6 +58,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
         return codec.encodeGetCurrentBoardResponse(result)
 
     def canMove(self, request: gameapi_pb2.PlayerNameRequest, context):
+        self.__checkForGameStatus()
         playerName = request.playerName
         
         if (self.state.hasGameEnded()):
@@ -91,6 +95,18 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     
     def areEnoughPlayers(self):
         return (len(self.state.playersList) >= self.gameProgram.requiredNumOfPlayers)
+    
+    def __checkForGameStatus(self):
+        if (self.state.isGameRunning() == False):
+            if (self.restarting == False):
+                if (self.areEnoughPlayers()):
+                    print(self.state.whoWon()+' Restarting game..')
+                else:
+                    print('Starting game..')
+                self.restarting = True
+            self.started = self.startNewGame()
+            if (self.started):
+                self.restarting = False
 
     def __validatePlayer(self, playerName):
         if (self.state.doesPlayerExist(playerName)):
@@ -125,30 +141,12 @@ class GameServer:
     def __init__(self, gameProgram):
         self.gameServer = GameRpcServer(gameProgram)
         self.started = False
-        rpc = threading.Thread(target=self.__rpcListener, args=())
-        rpc.daemon = True
-        rpc.start()
 
-    def start(self):
-        self.gameServer.startNewGame()
-        restarting = False
-
-        while True:
-            if (self.gameServer.state.isGameRunning() == False):
-                if (restarting == False):
-                    if (self.gameServer.areEnoughPlayers()):
-                        print(self.gameServer.state.whoWon()+' Restarting game..')
-                    else:
-                        print('Starting game..')
-                    restarting = True
-                self.started = self.gameServer.startNewGame()
-                if (self.started):
-                    restarting = False
-
-    def __rpcListener(self):
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
         gameapi_pb2_grpc.add_GameApiServicer_to_server(self.gameServer, server)
         server.add_insecure_port('[::]:'+str(PORT))
         print("gRPC starting")
         server.start()
         server.wait_for_termination()
+
+        print('heere?')

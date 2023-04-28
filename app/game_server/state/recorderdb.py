@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import pathlib
-import time
+import threading
 
 from models.game import Game
 from models.move import Move
@@ -18,6 +18,7 @@ class RecorderDb:
     def __init__(self):
         try:
             self.conn = sqlite3.connect(RECORDER_DB, check_same_thread=False)
+            self.lock = threading.Lock()
             self.__create_tables()
         except Error as e:
             print(e)
@@ -30,8 +31,8 @@ class RecorderDb:
     def getPlayer(self, playerName):
         sql = ''' SELECT * FROM players
                 WHERE name = ? '''
-        db = self.conn.cursor()
         try:
+            db = self.conn.cursor()
             db.execute(sql, (playerName,))
             result = db.fetchone()
             if (result == None):
@@ -40,79 +41,67 @@ class RecorderDb:
         except Error as e:
             print("RecorderDb: Unable to get User: "+str(e))
             return -1
-        finally:
-            db.close()
         
 
     def createPlayer(self, playerName):
+        timestamp = currentTimestamp()
         sql = ''' INSERT INTO players(name,createddate,lastonline)
                 VALUES(?,?,?) '''
-        db = self.conn.cursor()
         try:
-            timestamp = currentTimestamp()
-            db.execute(sql, (playerName, timestamp, timestamp))
-            self.conn.commit()
-            return Player(int(db.lastrowid), playerName, timestamp, timestamp)
+            with self.lock:
+                db = self.conn.cursor()
+                db.execute(sql, (playerName, timestamp, timestamp))
+                return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:
             print("RecorderDb: Unable to add User: "+str(e))
             return -1
-        finally:
-            db.close()
 
     def updatePlayer(self, player):
         sql = ''' UPDATE players
                 SET lastonline = (?)
                 WHERE id = ?'''
-        db = self.conn.cursor()
         try:
-            db.execute(sql, (currentTimestamp(), player.id))
-            self.conn.commit()
-            return player
+            with self.lock:
+                db = self.conn.cursor()
+                db.execute(sql, (currentTimestamp(), player.id))
+                return player
         except Error as e:
             print("RecorderDb: Unable to update Player: "+str(e))
             return -1
-        finally:
-            db.close()      
-
 
     def createGame(self, retries = 10):
+        timestamp = currentTimestamp()
         sql = ''' INSERT INTO games(date,status)
                 VALUES(?,?) '''
-        db = self.conn.cursor()
         for attempt in range(retries):
             try:
-                timestamp = currentTimestamp()
-                db.execute(sql, (timestamp,int(GameStatus.Started)))
-                self.conn.commit()
-                return Game(db.lastrowid, {}, timestamp, GameStatus.Started)
+                with self.lock:
+                    db = self.conn.cursor()
+                    db.execute(sql, (timestamp, int(GameStatus.Started)))
+                    return Game(db.lastrowid, {}, timestamp, GameStatus.Started)
             except Error as e:
                 if "transaction" in str(e) and attempt < retries - 1:
                     # Transaction error: rollback and retry
                     self.conn.rollback()
-                    time.sleep(0.1)
                     continue
                 else:
                     # Other error or out of retries: give up
                     print("RecorderDb: Unable to add Game: "+str(e))
                     return -1
-            finally:
-                db.close()
 
     def updateGame(self, game: Game):
         sql = ''' UPDATE games
                 SET  (status)
                         = (?) 
                 WHERE id = ? '''
-        db = self.conn.cursor()
         try:
-            db.execute(sql, (game.status, game.id))
-            self.conn.commit()
-            return game
+            with self.lock:
+                db = self.conn.cursor()
+                db.execute(sql, (game.status, game.id))
+                return game
         except Error as e:
             print("RecorderDb: Unable to update Game: "+str(e))
             return -1
-        finally:
-            db.close()
 
     def addMoves(self, moves: list[Move]):
         data = []
@@ -120,41 +109,36 @@ class RecorderDb:
             data.append((move.gameid, move.playerid, idx, move.move, move.date))
         sql = ''' INSERT INTO moves(gameid,playerid,idx,move,date)
                 VALUES(?,?,?,?,?) '''
-        db = self.conn.cursor()
         try:
-            db.executemany(sql, data)
-            self.conn.commit()
-            return True
+            with self.lock:
+                db = self.conn.cursor()
+                db.executemany(sql, data)
+                return True
         except Error as e:
             print("RecorderDb: Unable to add Moves: "+str(e))
             return -1
-        finally:
-            db.close()
 
     def addMove(self, move: Move):
         sql = ''' INSERT INTO moves(gameid,playerid,idx,move,date)
                 VALUES(?,?,?,?,?) '''
-        db = self.conn.cursor()
         try:
-            db.execute(sql, (move.gameid, move.playerid, move.idx, move.move, self.__currentTime()))
-            self.conn.commit()
-            return db.lastrowid
+            with self.lock:
+                db = self.conn.cursor()
+                db.execute(sql, (move.gameid, move.playerid, move.idx, move.move, self.__currentTime()))
+                return db.lastrowid
         except Error as e:
             print("RecorderDb: Unable to add Move: "+str(e))
             return -1
-        finally:
-            db.close()
 
     def __create_tables(self):
         sqlFile = open(str(pathlib.Path().resolve())+'/game_server/state/game_records_schema.sql')
-        db = self.conn.cursor()
         try:
             sql = sqlFile.read()
+            db = self.conn.cursor()
             db.executescript(sql)
         except Error as e:
             print(e)
             raise e
         finally:
             sqlFile.close()
-            db.close()
             
