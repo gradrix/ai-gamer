@@ -148,5 +148,3 @@ class GameServer:
         print("gRPC starting")
         server.start()
         server.wait_for_termination()
-
-        print('heere?')
