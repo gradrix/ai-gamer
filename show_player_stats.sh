@@ -24,7 +24,7 @@ FROM (
         GROUP BY m.gameid, m.playerid
     ) pg ON pg.playerid = p.id 
     LEFT JOIN (
-        SELECT m.gameid, m.playerid, MAX(m.date) AS max_date
+        SELECT m.gameid, m.playerid, MAX(m.idx) AS max_date
         FROM moves m
         GROUP BY m.gameid
     ) last_moves ON last_moves.gameid = pg.gameid

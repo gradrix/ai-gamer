@@ -3,7 +3,7 @@ import random
 import time
 import threading
 
-from random_client.rpcclient import GameEngineRpcClient
+from common.rpc.rpcclient import GameEngineRpcClient
 from common.models.enums import PlayerStatus, MoveStatus, PlayerRegistration
 
 class GameClient:
@@ -29,11 +29,8 @@ class GameClient:
                 case PlayerStatus.CanMove:
                     self.__makeSomeMove()
 
-    #TODO make AI move
     def __makeSomeMove(self):
-        #currentBoard = self.client.getCurrentBoard()
         possibleMoves = self.client.getPossibleMoves()
-
         #pick random move
         moveResult = None
         while (moveResult != MoveStatus.Error and moveResult != MoveStatus.Success):

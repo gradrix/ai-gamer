@@ -3,6 +3,7 @@ from common.models.game import Game
 from common.models.move import Move
 from common.models.player import Player
 from common.models.enums import PlayerStatus, GameStatus
+from common.timehelpers import currentTimestamp
 
 class GameStateManager:
     def __init__(self):
@@ -15,6 +16,7 @@ class GameStateManager:
         if (player == None):
             player = self.db.createPlayer(playerName)
         else:
+            player.lastonline = currentTimestamp()
             print('Loading existing player.')
 
         player.status = PlayerStatus.Wait

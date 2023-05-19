@@ -9,7 +9,7 @@ from common.rpc import gameapi_pb2_grpc
 from common.models.enums import MoveStatus, PlayerStatus, PlayerRegistration, GameStatus
 from common.models.move import Move
 from common.models.gamebase import GameBase
-from game_server.state.gamestatemanager import GameStateManager
+from state.gamestatemanager import GameStateManager
 from common.timehelpers import currentTimestamp
 import common.rpc.codec as codec
 
@@ -19,6 +19,7 @@ HOST = 'localhost'
 class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
 
     def __init__(self, gameProgram):
+        self.lock = threading.Lock()
         self.state = GameStateManager()
         self.gameProgram: GameBase = gameProgram
         self.restarting = False
@@ -87,10 +88,11 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     def startNewGame(self):
         if (len(self.state.playersList) < self.gameProgram.requiredNumOfPlayers):
             return False
-        started = self.gameProgram.startNewGame(self.state.playersList)  
-        if (started):
-            self.state.registerGame()
-        return started
+        with self.lock:
+            started = self.gameProgram.startNewGame(self.state.playersList)
+            if (started and not(self.state.isGameRunning())):
+                self.state.registerGame()
+            return started
     
     def areEnoughPlayers(self):
         return (len(self.state.playersList) >= self.gameProgram.requiredNumOfPlayers)
