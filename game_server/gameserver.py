@@ -9,7 +9,7 @@ from common.rpc import gameapi_pb2_grpc
 from common.models.enums import MoveStatus, PlayerStatus, PlayerRegistration, GameStatus
 from common.models.move import Move
 from common.models.gamebase import GameBase
-from state.gamestatemanager import GameStateManager
+from .state.gamestatemanager import GameStateManager
 from common.timehelpers import currentTimestamp
 import common.rpc.codec as codec
 

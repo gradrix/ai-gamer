@@ -9,15 +9,25 @@
             "type": "python",
             "request": "launch",
             "program": "start-server.py",
-            "cwd": "${workspaceFolder}/app",
+            "cwd": "${workspaceFolder}/game_server",
             "console": "integratedTerminal"
         },        
         {
-            "name": "Run: Client",
+            "name": "Run: Random Client",
             "type": "python",
             "request": "launch",
-            "program": "start-client.py",
-            "cwd": "${workspaceFolder}/app",
+            "program": "start-random-client.py",
+            "args": ["Debug-Random-Agent"],
+            "cwd": "${workspaceFolder}/random_client",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run: Console Client",
+            "type": "python",
+            "request": "launch",
+            "program": "start-console-client.py",
+            "args": ["Debug-Console-Agent"],
+            "cwd": "${workspaceFolder}/console_client",
             "console": "integratedTerminal"
         }
     ]

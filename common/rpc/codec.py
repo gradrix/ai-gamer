@@ -38,7 +38,7 @@ def decodeGetCurrentBoardResponse(response: gameapi_pb2.GetCurrentBoardResponse)
     result = []
     for row in response.grid:
         rows = []
-        for item in row:
+        for item in row.items:
             rows.append(item)
         result.append(rows)
     return result
@@ -46,7 +46,7 @@ def decodeGetCurrentBoardResponse(response: gameapi_pb2.GetCurrentBoardResponse)
 def encodeGetCurrentBoardResponse(response):
     result = []
     for row in response:
-        result.append(gameapi_pb2.BoardRow(items = row.items))
+        result.append(gameapi_pb2.BoardRow(items = row))
     return gameapi_pb2.GetCurrentBoardResponse(grid = result)
 
 def decodeCanMoveResponse(response: gameapi_pb2.CanMoveResponse):
