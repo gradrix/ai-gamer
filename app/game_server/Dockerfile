@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code to the container
 COPY ./app .
 
+# Expose the gRPC server's port
+EXPOSE 8080
+
 # Specify the command to run your application
 CMD [ "python", "start-server.py" ]

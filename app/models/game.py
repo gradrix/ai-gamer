@@ -14,9 +14,6 @@ class MoveResult:
     status: MoveStatus = None
     move: str = None
 
-    def __init_(self):
-        pass
-
     def __init__(self, status, move):  
         self.status = status
         self.move = move

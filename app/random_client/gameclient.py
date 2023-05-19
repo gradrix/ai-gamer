@@ -1,17 +1,16 @@
 
 import random
-import uuid
 import time
 import threading
 
-from ai_client.rpcclient import GameEngineRpcClient
+from random_client.rpcclient import GameEngineRpcClient
 from models.enums import PlayerStatus, MoveStatus, PlayerRegistration
 
 class GameClient:
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, agentName):
         self.client = GameEngineRpcClient(host, port)
-        self.playerId = 'ai-' +str(uuid.uuid4())
+        self.playerId = agentName
         self.__initKeepAliveRequestor()
         self.__register()
 

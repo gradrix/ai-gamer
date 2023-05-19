@@ -9,7 +9,7 @@ from models.player import Player
 from models.enums import GameStatus
 from common.timehelpers import currentTimestamp
 
-RECORDER_DB = 'game_records.db'
+RECORDER_DB = '../db/game_records.db'
 
 class RecorderDb:
 
@@ -51,6 +51,7 @@ class RecorderDb:
             with self.lock:
                 db = self.conn.cursor()
                 db.execute(sql, (playerName, timestamp, timestamp))
+                self.conn.commit()
                 return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:
             print("RecorderDb: Unable to add User: "+str(e))
@@ -64,6 +65,7 @@ class RecorderDb:
             with self.lock:
                 db = self.conn.cursor()
                 db.execute(sql, (currentTimestamp(), player.id))
+                self.conn.commit()
                 return player
         except Error as e:
             print("RecorderDb: Unable to update Player: "+str(e))
@@ -78,6 +80,7 @@ class RecorderDb:
                 with self.lock:
                     db = self.conn.cursor()
                     db.execute(sql, (timestamp, int(GameStatus.Started)))
+                    self.conn.commit()
                     return Game(db.lastrowid, {}, timestamp, GameStatus.Started)
             except Error as e:
                 if "transaction" in str(e) and attempt < retries - 1:
@@ -98,6 +101,7 @@ class RecorderDb:
             with self.lock:
                 db = self.conn.cursor()
                 db.execute(sql, (game.status, game.id))
+                self.conn.commit()
                 return game
         except Error as e:
             print("RecorderDb: Unable to update Game: "+str(e))
@@ -113,6 +117,7 @@ class RecorderDb:
             with self.lock:
                 db = self.conn.cursor()
                 db.executemany(sql, data)
+                self.conn.commit()
                 return True
         except Error as e:
             print("RecorderDb: Unable to add Moves: "+str(e))
@@ -125,6 +130,7 @@ class RecorderDb:
             with self.lock:
                 db = self.conn.cursor()
                 db.execute(sql, (move.gameid, move.playerid, move.idx, move.move, self.__currentTime()))
+                self.conn.commit()
                 return db.lastrowid
         except Error as e:
             print("RecorderDb: Unable to add Move: "+str(e))
