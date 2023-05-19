@@ -1,6 +1,6 @@
-from models.game import MoveResult
-from rpc import gameapi_pb2
-from models.enums import PlayerRegistration, PlayerStatus, MoveStatus
+from ..rpc import gameapi_pb2
+from ..models.game import MoveResult
+from ..models.enums import PlayerRegistration, PlayerStatus, MoveStatus
 
 def decodeRegisterPlayerResponse(response: gameapi_pb2.RegisterPlayerResponse):
     match response.registrationStatus:

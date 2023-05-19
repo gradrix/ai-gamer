@@ -6,4 +6,4 @@ if [ $# -lt 1 ]; then
 fi
 
 agentName=$1
-python app/start-random-client.py "$agentName"
+python random_client/start-random-client.py "$agentName"

@@ -1,7 +1,7 @@
 from array import array
 import grpc
 
-from rpc import gameapi_pb2_grpc, gameapi_pb2
+from common.rpc import gameapi_pb2_grpc, gameapi_pb2
 import common.rpc.codec as codec
 
 class GameEngineRpcClient:

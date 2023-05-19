@@ -1,15 +1,14 @@
 import threading
 import time
 import grpc
-from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 from google.protobuf import empty_pb2 as EmptyRequest
 from concurrent import futures
 
-from rpc import gameapi_pb2
-from rpc import gameapi_pb2_grpc
-from models.enums import MoveStatus, PlayerStatus, PlayerRegistration, GameStatus
-from models.move import Move
-from models.gamebase import GameBase
+from common.rpc import gameapi_pb2
+from common.rpc import gameapi_pb2_grpc
+from common.models.enums import MoveStatus, PlayerStatus, PlayerRegistration, GameStatus
+from common.models.move import Move
+from common.models.gamebase import GameBase
 from game_server.state.gamestatemanager import GameStateManager
 from common.timehelpers import currentTimestamp
 import common.rpc.codec as codec

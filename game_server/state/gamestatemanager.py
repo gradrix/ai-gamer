@@ -1,9 +1,8 @@
 from .recorderdb import RecorderDb
-from models.game import Game
-from models.move import Move
-from models.player import Player
-from models.enums import PlayerStatus, GameStatus
-from common.timehelpers import currentTimestamp
+from common.models.game import Game
+from common.models.move import Move
+from common.models.player import Player
+from common.models.enums import PlayerStatus, GameStatus
 
 class GameStateManager:
     def __init__(self):

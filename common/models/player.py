@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass
 
-from models.enums import PlayerStatus
+from .enums import PlayerStatus
 
 @dataclass
 class Player:

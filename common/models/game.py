@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from models.player import Player
-from models.enums import GameStatus, MoveStatus
+from .player import Player
+from .enums import GameStatus, MoveStatus
 
 @dataclass
 class Game:

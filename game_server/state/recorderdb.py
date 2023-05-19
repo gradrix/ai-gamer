@@ -3,13 +3,13 @@ from sqlite3 import Error
 import pathlib
 import threading
 
-from models.game import Game
-from models.move import Move
-from models.player import Player
-from models.enums import GameStatus
+from common.models.game import Game
+from common.models.move import Move
+from common.models.player import Player
+from common.models.enums import GameStatus
 from common.timehelpers import currentTimestamp
 
-RECORDER_DB = '../db/game_records.db'
+RECORDER_DB = 'db/game_records.db'
 
 class RecorderDb:
 

@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from models.game import MoveResult
-from models.player import Player
+from .player import Player
 
 # ------------------------------ #
 #     Abstract class of games    #

@@ -4,7 +4,7 @@ import time
 import threading
 
 from random_client.rpcclient import GameEngineRpcClient
-from models.enums import PlayerStatus, MoveStatus, PlayerRegistration
+from common.models.enums import PlayerStatus, MoveStatus, PlayerRegistration
 
 class GameClient:
 

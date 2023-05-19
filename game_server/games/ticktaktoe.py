@@ -2,10 +2,10 @@ from array import array
 import random
 import time
 
-from models.gamebase import GameBase
-from models.enums import PlayerStatus, PlayerRegistration, MoveStatus
-from models.player import Player
-from models.game import MoveResult
+from common.models.gamebase import GameBase
+from common.models.enums import PlayerStatus, MoveStatus
+from common.models.player import Player
+from common.models.game import MoveResult
 
 E = 0 #Empty
 X = 1 #X
