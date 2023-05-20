@@ -11,6 +11,15 @@
             "program": "start-server.py",
             "cwd": "${workspaceFolder}/game_server",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Run: AI Client",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/ai_client",
+            "env": {},
+            "args": []
         },        
         {
             "name": "Run: Random Client",

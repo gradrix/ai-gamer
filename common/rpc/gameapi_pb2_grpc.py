@@ -15,32 +15,32 @@ class GameApiStub(object):
             channel: A grpc.Channel.
         """
         self.registerPlayer = channel.unary_unary(
-                '/GameApi/registerPlayer',
+                '/game_api.GameApi/registerPlayer',
                 request_serializer=gameapi__pb2.PlayerNameRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.RegisterPlayerResponse.FromString,
                 )
         self.getPossibleMoves = channel.unary_unary(
-                '/GameApi/getPossibleMoves',
+                '/game_api.GameApi/getPossibleMoves',
                 request_serializer=gameapi__pb2.GetPossibleMovesRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.GetPossibleMovesResponse.FromString,
                 )
         self.getCurrentBoard = channel.unary_unary(
-                '/GameApi/getCurrentBoard',
+                '/game_api.GameApi/getCurrentBoard',
                 request_serializer=gameapi__pb2.GetCurrentBoardRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.GetCurrentBoardResponse.FromString,
                 )
         self.canMove = channel.unary_unary(
-                '/GameApi/canMove',
+                '/game_api.GameApi/canMove',
                 request_serializer=gameapi__pb2.PlayerNameRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.CanMoveResponse.FromString,
                 )
         self.move = channel.unary_unary(
-                '/GameApi/move',
+                '/game_api.GameApi/move',
                 request_serializer=gameapi__pb2.MoveRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.MoveResponse.FromString,
                 )
         self.keepAlive = channel.unary_unary(
-                '/GameApi/keepAlive',
+                '/game_api.GameApi/keepAlive',
                 request_serializer=gameapi__pb2.PlayerNameRequest.SerializeToString,
                 response_deserializer=gameapi__pb2.KeepAliveResponse.FromString,
                 )
@@ -120,7 +120,7 @@ def add_GameApiServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'GameApi', rpc_method_handlers)
+            'game_api.GameApi', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -139,7 +139,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/registerPlayer',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/registerPlayer',
             gameapi__pb2.PlayerNameRequest.SerializeToString,
             gameapi__pb2.RegisterPlayerResponse.FromString,
             options, channel_credentials,
@@ -156,7 +156,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/getPossibleMoves',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/getPossibleMoves',
             gameapi__pb2.GetPossibleMovesRequest.SerializeToString,
             gameapi__pb2.GetPossibleMovesResponse.FromString,
             options, channel_credentials,
@@ -173,7 +173,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/getCurrentBoard',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/getCurrentBoard',
             gameapi__pb2.GetCurrentBoardRequest.SerializeToString,
             gameapi__pb2.GetCurrentBoardResponse.FromString,
             options, channel_credentials,
@@ -190,7 +190,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/canMove',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/canMove',
             gameapi__pb2.PlayerNameRequest.SerializeToString,
             gameapi__pb2.CanMoveResponse.FromString,
             options, channel_credentials,
@@ -207,7 +207,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/move',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/move',
             gameapi__pb2.MoveRequest.SerializeToString,
             gameapi__pb2.MoveResponse.FromString,
             options, channel_credentials,
@@ -224,7 +224,7 @@ class GameApi(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/GameApi/keepAlive',
+        return grpc.experimental.unary_unary(request, target, '/game_api.GameApi/keepAlive',
             gameapi__pb2.PlayerNameRequest.SerializeToString,
             gameapi__pb2.KeepAliveResponse.FromString,
             options, channel_credentials,
