@@ -1,9 +1,12 @@
+import logging
 from .recorderdb import RecorderDb
 from common.models.game import Game
 from common.models.move import Move
 from common.models.player import Player
 from common.models.enums import PlayerStatus, GameStatus
 from common.timehelpers import currentTimestamp
+
+logger = logging.getLogger(__name__)
 
 class GameStateManager:
     def __init__(self):
@@ -17,7 +20,7 @@ class GameStateManager:
             player = self.db.createPlayer(playerName)
         else:
             player.lastonline = currentTimestamp()
-            print('Loading existing player.')
+            logger.info('Loading existing player.')
 
         player.status = PlayerStatus.Wait
         self.game.players[playerName] = player

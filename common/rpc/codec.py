@@ -24,15 +24,17 @@ def encodeRegisterPlayerResponse(registrationResult: PlayerRegistration):
 def decodeGetPossibleMovesResponse(response: gameapi_pb2.GetPossibleMovesResponse):
     result = []
     for move in response.moves:
-        result.append((move.x, move.y))
+        items = []
+        for item in move.items:
+            items.append(item)
+        result.append(items)
     return result
 
 def encodeGetPossibleMovesResponse(response):
-    result = []
+    moves = []
     for move in response:
-        (x, y) = move
-        result.append(gameapi_pb2.MoveCoordinates(x = x, y = y))
-    return gameapi_pb2.GetPossibleMovesResponse(moves = result)
+        moves.append(gameapi_pb2.MoveResult(items = move))
+    return gameapi_pb2.GetPossibleMovesResponse(moves = moves)
 
 def decodeGetCurrentBoardResponse(response: gameapi_pb2.GetCurrentBoardResponse):
     result = []

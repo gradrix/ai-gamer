@@ -35,12 +35,11 @@ enum PlayerRegistration {
 message GetPossibleMovesRequest {}
 
 message GetPossibleMovesResponse {
-    repeated MoveCoordinates moves = 1;
+    repeated MoveResult moves = 1;
 }
 
-message MoveCoordinates {
-    int32 x = 1;
-    int32 y = 2;
+message MoveResult {
+    repeated int32 items = 1;
 }
 
 message GetCurrentBoardRequest {}

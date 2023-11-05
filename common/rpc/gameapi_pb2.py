@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rgameapi.proto\x12\x08game_api\"\'\n\x11PlayerNameRequest\x12\x12\n\nplayerName\x18\x01 \x01(\t\"R\n\x16RegisterPlayerResponse\x12\x38\n\x12registrationStatus\x18\x01 \x01(\x0e\x32\x1c.game_api.PlayerRegistration\"\x19\n\x17GetPossibleMovesRequest\"D\n\x18GetPossibleMovesResponse\x12(\n\x05moves\x18\x01 \x03(\x0b\x32\x19.game_api.MoveCoordinates\"\'\n\x0fMoveCoordinates\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"\x18\n\x16GetCurrentBoardRequest\";\n\x17GetCurrentBoardResponse\x12 \n\x04grid\x18\x01 \x03(\x0b\x32\x12.game_api.BoardRow\"\x19\n\x08\x42oardRow\x12\r\n\x05items\x18\x01 \x03(\x05\"?\n\x0f\x43\x61nMoveResponse\x12,\n\x0cplayerStatus\x18\x01 \x01(\x0e\x32\x16.game_api.PlayerStatus\"0\n\x0bMoveRequest\x12\x12\n\nplayerName\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x01(\x05\"B\n\x0cMoveResponse\x12$\n\x06status\x18\x01 \x01(\x0e\x32\x14.game_api.MoveStatus\x12\x0c\n\x04move\x18\x02 \x01(\t\"\x13\n\x11KeepAliveResponse*_\n\x12PlayerRegistration\x12\x18\n\x14REGISTRATION_SUCCESS\x10\x00\x12\x17\n\x13NO_PLAYER_SLOT_LEFT\x10\x01\x12\x16\n\x12\x41LREADY_REGISTERED\x10\x02*\\\n\x0cPlayerStatus\x12\x07\n\x03WON\x10\x00\x12\x08\n\x04LOST\x10\x01\x12\x08\n\x04\x44RAW\x10\x02\x12\x0c\n\x08\x43\x41N_MOVE\x10\x03\x12\x08\n\x04WAIT\x10\x04\x12\x17\n\x13UNREGISTERED_PLAYER\x10\x05*8\n\nMoveStatus\x12\x10\n\x0cMOVE_SUCCESS\x10\x00\x12\r\n\tINCORRECT\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x32\xda\x03\n\x07GameApi\x12Q\n\x0eregisterPlayer\x12\x1b.game_api.PlayerNameRequest\x1a .game_api.RegisterPlayerResponse\"\x00\x12[\n\x10getPossibleMoves\x12!.game_api.GetPossibleMovesRequest\x1a\".game_api.GetPossibleMovesResponse\"\x00\x12X\n\x0fgetCurrentBoard\x12 .game_api.GetCurrentBoardRequest\x1a!.game_api.GetCurrentBoardResponse\"\x00\x12\x43\n\x07\x63\x61nMove\x12\x1b.game_api.PlayerNameRequest\x1a\x19.game_api.CanMoveResponse\"\x00\x12\x37\n\x04move\x12\x15.game_api.MoveRequest\x1a\x16.game_api.MoveResponse\"\x00\x12G\n\tkeepAlive\x12\x1b.game_api.PlayerNameRequest\x1a\x1b.game_api.KeepAliveResponse\"\x00\x42\x0cZ\n./game_apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rgameapi.proto\x12\x08game_api\"\'\n\x11PlayerNameRequest\x12\x12\n\nplayerName\x18\x01 \x01(\t\"R\n\x16RegisterPlayerResponse\x12\x38\n\x12registrationStatus\x18\x01 \x01(\x0e\x32\x1c.game_api.PlayerRegistration\"\x19\n\x17GetPossibleMovesRequest\"?\n\x18GetPossibleMovesResponse\x12#\n\x05moves\x18\x01 \x03(\x0b\x32\x14.game_api.MoveResult\"\x1b\n\nMoveResult\x12\r\n\x05items\x18\x01 \x03(\x05\"\x18\n\x16GetCurrentBoardRequest\";\n\x17GetCurrentBoardResponse\x12 \n\x04grid\x18\x01 \x03(\x0b\x32\x12.game_api.BoardRow\"\x19\n\x08\x42oardRow\x12\r\n\x05items\x18\x01 \x03(\x05\"?\n\x0f\x43\x61nMoveResponse\x12,\n\x0cplayerStatus\x18\x01 \x01(\x0e\x32\x16.game_api.PlayerStatus\"0\n\x0bMoveRequest\x12\x12\n\nplayerName\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x01(\x05\"B\n\x0cMoveResponse\x12$\n\x06status\x18\x01 \x01(\x0e\x32\x14.game_api.MoveStatus\x12\x0c\n\x04move\x18\x02 \x01(\t\"\x13\n\x11KeepAliveResponse*_\n\x12PlayerRegistration\x12\x18\n\x14REGISTRATION_SUCCESS\x10\x00\x12\x17\n\x13NO_PLAYER_SLOT_LEFT\x10\x01\x12\x16\n\x12\x41LREADY_REGISTERED\x10\x02*\\\n\x0cPlayerStatus\x12\x07\n\x03WON\x10\x00\x12\x08\n\x04LOST\x10\x01\x12\x08\n\x04\x44RAW\x10\x02\x12\x0c\n\x08\x43\x41N_MOVE\x10\x03\x12\x08\n\x04WAIT\x10\x04\x12\x17\n\x13UNREGISTERED_PLAYER\x10\x05*8\n\nMoveStatus\x12\x10\n\x0cMOVE_SUCCESS\x10\x00\x12\r\n\tINCORRECT\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x32\xda\x03\n\x07GameApi\x12Q\n\x0eregisterPlayer\x12\x1b.game_api.PlayerNameRequest\x1a .game_api.RegisterPlayerResponse\"\x00\x12[\n\x10getPossibleMoves\x12!.game_api.GetPossibleMovesRequest\x1a\".game_api.GetPossibleMovesResponse\"\x00\x12X\n\x0fgetCurrentBoard\x12 .game_api.GetCurrentBoardRequest\x1a!.game_api.GetCurrentBoardResponse\"\x00\x12\x43\n\x07\x63\x61nMove\x12\x1b.game_api.PlayerNameRequest\x1a\x19.game_api.CanMoveResponse\"\x00\x12\x37\n\x04move\x12\x15.game_api.MoveRequest\x1a\x16.game_api.MoveResponse\"\x00\x12G\n\tkeepAlive\x12\x1b.game_api.PlayerNameRequest\x1a\x1b.game_api.KeepAliveResponse\"\x00\x42\x0cZ\n./game_apib\x06proto3')
 
 _PLAYERREGISTRATION = DESCRIPTOR.enum_types_by_name['PlayerRegistration']
 PlayerRegistration = enum_type_wrapper.EnumTypeWrapper(_PLAYERREGISTRATION)
@@ -41,7 +41,7 @@ _PLAYERNAMEREQUEST = DESCRIPTOR.message_types_by_name['PlayerNameRequest']
 _REGISTERPLAYERRESPONSE = DESCRIPTOR.message_types_by_name['RegisterPlayerResponse']
 _GETPOSSIBLEMOVESREQUEST = DESCRIPTOR.message_types_by_name['GetPossibleMovesRequest']
 _GETPOSSIBLEMOVESRESPONSE = DESCRIPTOR.message_types_by_name['GetPossibleMovesResponse']
-_MOVECOORDINATES = DESCRIPTOR.message_types_by_name['MoveCoordinates']
+_MOVERESULT = DESCRIPTOR.message_types_by_name['MoveResult']
 _GETCURRENTBOARDREQUEST = DESCRIPTOR.message_types_by_name['GetCurrentBoardRequest']
 _GETCURRENTBOARDRESPONSE = DESCRIPTOR.message_types_by_name['GetCurrentBoardResponse']
 _BOARDROW = DESCRIPTOR.message_types_by_name['BoardRow']
@@ -77,12 +77,12 @@ GetPossibleMovesResponse = _reflection.GeneratedProtocolMessageType('GetPossible
   })
 _sym_db.RegisterMessage(GetPossibleMovesResponse)
 
-MoveCoordinates = _reflection.GeneratedProtocolMessageType('MoveCoordinates', (_message.Message,), {
-  'DESCRIPTOR' : _MOVECOORDINATES,
+MoveResult = _reflection.GeneratedProtocolMessageType('MoveResult', (_message.Message,), {
+  'DESCRIPTOR' : _MOVERESULT,
   '__module__' : 'gameapi_pb2'
-  # @@protoc_insertion_point(class_scope:game_api.MoveCoordinates)
+  # @@protoc_insertion_point(class_scope:game_api.MoveResult)
   })
-_sym_db.RegisterMessage(MoveCoordinates)
+_sym_db.RegisterMessage(MoveResult)
 
 GetCurrentBoardRequest = _reflection.GeneratedProtocolMessageType('GetCurrentBoardRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETCURRENTBOARDREQUEST,
@@ -138,12 +138,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\n./game_api'
-  _PLAYERREGISTRATION._serialized_start=608
-  _PLAYERREGISTRATION._serialized_end=703
-  _PLAYERSTATUS._serialized_start=705
-  _PLAYERSTATUS._serialized_end=797
-  _MOVESTATUS._serialized_start=799
-  _MOVESTATUS._serialized_end=855
+  _PLAYERREGISTRATION._serialized_start=591
+  _PLAYERREGISTRATION._serialized_end=686
+  _PLAYERSTATUS._serialized_start=688
+  _PLAYERSTATUS._serialized_end=780
+  _MOVESTATUS._serialized_start=782
+  _MOVESTATUS._serialized_end=838
   _PLAYERNAMEREQUEST._serialized_start=27
   _PLAYERNAMEREQUEST._serialized_end=66
   _REGISTERPLAYERRESPONSE._serialized_start=68
@@ -151,23 +151,23 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _GETPOSSIBLEMOVESREQUEST._serialized_start=152
   _GETPOSSIBLEMOVESREQUEST._serialized_end=177
   _GETPOSSIBLEMOVESRESPONSE._serialized_start=179
-  _GETPOSSIBLEMOVESRESPONSE._serialized_end=247
-  _MOVECOORDINATES._serialized_start=249
-  _MOVECOORDINATES._serialized_end=288
-  _GETCURRENTBOARDREQUEST._serialized_start=290
-  _GETCURRENTBOARDREQUEST._serialized_end=314
-  _GETCURRENTBOARDRESPONSE._serialized_start=316
-  _GETCURRENTBOARDRESPONSE._serialized_end=375
-  _BOARDROW._serialized_start=377
-  _BOARDROW._serialized_end=402
-  _CANMOVERESPONSE._serialized_start=404
-  _CANMOVERESPONSE._serialized_end=467
-  _MOVEREQUEST._serialized_start=469
-  _MOVEREQUEST._serialized_end=517
-  _MOVERESPONSE._serialized_start=519
-  _MOVERESPONSE._serialized_end=585
-  _KEEPALIVERESPONSE._serialized_start=587
-  _KEEPALIVERESPONSE._serialized_end=606
-  _GAMEAPI._serialized_start=858
-  _GAMEAPI._serialized_end=1332
+  _GETPOSSIBLEMOVESRESPONSE._serialized_end=242
+  _MOVERESULT._serialized_start=244
+  _MOVERESULT._serialized_end=271
+  _GETCURRENTBOARDREQUEST._serialized_start=273
+  _GETCURRENTBOARDREQUEST._serialized_end=297
+  _GETCURRENTBOARDRESPONSE._serialized_start=299
+  _GETCURRENTBOARDRESPONSE._serialized_end=358
+  _BOARDROW._serialized_start=360
+  _BOARDROW._serialized_end=385
+  _CANMOVERESPONSE._serialized_start=387
+  _CANMOVERESPONSE._serialized_end=450
+  _MOVEREQUEST._serialized_start=452
+  _MOVEREQUEST._serialized_end=500
+  _MOVERESPONSE._serialized_start=502
+  _MOVERESPONSE._serialized_end=568
+  _KEEPALIVERESPONSE._serialized_start=570
+  _KEEPALIVERESPONSE._serialized_end=589
+  _GAMEAPI._serialized_start=841
+  _GAMEAPI._serialized_end=1315
 # @@protoc_insertion_point(module_scope)

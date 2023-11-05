@@ -7,7 +7,7 @@ docker stop game_server >/dev/null 2>&1 && docker rm game_server >/dev/null 2>&1
 docker build -t game_server -f ./game_server/Dockerfile .
 
 # Run the new game_server container
-docker run -d -v $(pwd)/db:/app/db  -p 8080:8080 --name game_server game_server
+docker run -d -v $(pwd)/data/db:/app/data/db  -p 8080:8080 --name game_server game_server
 
 # Watch for logs
 docker logs -f game_server

@@ -28,6 +28,7 @@ class GameClient:
                     self.__gameEnded('It\'s a draw..')
                 case PlayerStatus.CanMove:
                     self.__makeSomeMove()
+            time.sleep(0.2)
 
     def __makeSomeMove(self):
         possibleMoves = self.client.getPossibleMoves()

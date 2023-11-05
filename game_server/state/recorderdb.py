@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3 import Error
 import pathlib
 import threading
+import logging
 
 from common.models.game import Game
 from common.models.move import Move
@@ -9,7 +10,9 @@ from common.models.player import Player
 from common.models.enums import GameStatus
 from common.timehelpers import currentTimestamp
 
-RECORDER_DB = 'db/game_records.db'
+logger = logging.getLogger(__name__)
+
+RECORDER_DB = 'data/db/game_records.db'
 
 class RecorderDb:
 
@@ -21,7 +24,7 @@ class RecorderDb:
             self.lock = threading.Lock()
             self.__create_tables()
         except Error as e:
-            print(e)
+            logger.critical(e)
             raise e
 
     def __del__(self):
@@ -39,7 +42,7 @@ class RecorderDb:
                 return None
             return Player(int(result[0]), str(result[1]), int(result[2]), int(result[3]))
         except Error as e:
-            print("RecorderDb: Unable to get User: "+str(e))
+            logger.error("RecorderDb: Unable to get User: "+str(e))
             return -1
         
 
@@ -54,7 +57,7 @@ class RecorderDb:
                 self.conn.commit()
                 return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:
-            print("RecorderDb: Unable to add User: "+str(e))
+            logger.error("RecorderDb: Unable to add User: "+str(e))
             return -1
 
     def updatePlayer(self, player):
@@ -68,7 +71,7 @@ class RecorderDb:
                 self.conn.commit()
                 return player
         except Error as e:
-            print("RecorderDb: Unable to update Player: "+str(e))
+            logger.error("RecorderDb: Unable to update Player: "+str(e))
             return -1
 
     def createGame(self, retries = 10):
@@ -89,7 +92,7 @@ class RecorderDb:
                     continue
                 else:
                     # Other error or out of retries: give up
-                    print("RecorderDb: Unable to add Game: "+str(e))
+                    logger.error("RecorderDb: Unable to add Game: "+str(e))
                     return -1
 
     def updateGame(self, game: Game):
@@ -104,7 +107,7 @@ class RecorderDb:
                 self.conn.commit()
                 return game
         except Error as e:
-            print("RecorderDb: Unable to update Game: "+str(e))
+            logger.error("RecorderDb: Unable to update Game: "+str(e))
             return -1
 
     def addMoves(self, moves: list[Move]):
@@ -120,7 +123,7 @@ class RecorderDb:
                 self.conn.commit()
                 return True
         except Error as e:
-            print("RecorderDb: Unable to add Moves: "+str(e))
+            logger.error("RecorderDb: Unable to add Moves: "+str(e))
             return -1
 
     def addMove(self, move: Move):
@@ -133,7 +136,7 @@ class RecorderDb:
                 self.conn.commit()
                 return db.lastrowid
         except Error as e:
-            print("RecorderDb: Unable to add Move: "+str(e))
+            logger.error("RecorderDb: Unable to add Move: "+str(e))
             return -1
 
     def __create_tables(self):
@@ -143,7 +146,7 @@ class RecorderDb:
             db = self.conn.cursor()
             db.executescript(sql)
         except Error as e:
-            print(e)
+            logger.critical(e)
             raise e
         finally:
             sqlFile.close()

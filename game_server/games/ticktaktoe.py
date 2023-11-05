@@ -48,7 +48,7 @@ class TikTakToe(GameBase):
         moves = []
         for y in range(0, self.ySize):
             for x in range(0, self.xSize):
-                moves.append((x, y))
+                moves.append([x, y])
         return moves
 
     def getCurrentBoard(self) -> array:

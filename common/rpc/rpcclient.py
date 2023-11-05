@@ -2,6 +2,7 @@ from array import array
 import grpc
 
 from common.rpc import gameapi_pb2_grpc, gameapi_pb2
+from common.models.enums import PlayerStatus
 import common.rpc.codec as codec
 
 class GameEngineRpcClient:
@@ -32,8 +33,12 @@ class GameEngineRpcClient:
 
     def canMove(self, playerName):
         request = codec.encodePlayerNameRequest(playerName)
-        result = self.stub.canMove(request)
-        return codec.decodeCanMoveResponse(result)
+        try:
+            result = self.stub.canMove(request)
+        except:
+            result = PlayerStatus.Wait
+        finally:
+            return codec.decodeCanMoveResponse(result)
 
     def move(self, playerName, index):
         request = codec.encodeMoveRequest(playerName, index)

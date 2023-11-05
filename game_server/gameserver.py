@@ -1,6 +1,7 @@
 import threading
 import time
 import grpc
+import logging
 from google.protobuf import empty_pb2 as EmptyRequest
 from concurrent import futures
 
@@ -16,6 +17,8 @@ import common.rpc.codec as codec
 PORT = 8080
 HOST = 'localhost'
 
+logger = logging.getLogger(__name__)
+
 class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
 
     def __init__(self, gameProgram):
@@ -30,23 +33,23 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     #gRPC methods
     def registerPlayer(self, request: gameapi_pb2.PlayerNameRequest, context):
         playerName = request.playerName
-        print('Registering player '+str(playerName) + ' ... ', end='')
+        logger.info('Registering player '+str(playerName) + ' ... ')
         result = self.__validatePlayer(playerName)
         match result:
             case PlayerRegistration.Success:
                 player = self.state.registerPlayer(playerName)
                 self.__syncPlayers()
-                print('->'+str(player.id)+'.')
+                logger.info('Newly registered with '+str(player.id)+'.')
             case PlayerRegistration.AlreadyRegistered:
                 player = self.state.registerPlayer(playerName)
                 self.__syncPlayers()
-                print('Already registered with id '+str(player.id)+'.')
+                logger.info('Already registered with id '+str(player.id)+'.')
             case PlayerRegistration.NoPlayerSlotsLeft:
                 players = self.state.playersList
                 playersStr = ''
                 for player in players:
                     playersStr += str(player)+' '
-                print('No player slots available for ' +str(player.name)+ 'as we already have: '+playersStr)
+                logger.warning('No player slots available for ' +str(player.name)+ 'as we already have: '+playersStr)
         return codec.encodeRegisterPlayerResponse(result)
 
     def getPossibleMoves(self, request: EmptyRequest, context):
@@ -101,9 +104,9 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
         if (self.state.isGameRunning() == False):
             if (self.restarting == False):
                 if (self.areEnoughPlayers()):
-                    print(self.state.whoWon()+' Restarting game..')
+                    logger.info(self.state.whoWon()+' Restarting game..')
                 else:
-                    print('Starting game..')
+                    logger.info('Starting game..')
                 self.restarting = True
             self.started = self.startNewGame()
             if (self.started):
@@ -129,7 +132,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
                 for player in self.state.playersList:
                     msElapsed = currentTime - player.lastonline
                     if (msElapsed > 3000):
-                        print('Removing player \''+str(player.name)+'\' who has been inactive for '+str(msElapsed)+'ms ..')
+                        logger.warning('Removing player \''+str(player.name)+'\' who has been inactive for '+str(msElapsed)+'ms ..')
                         self.state.inactivatePlayer(player.name)
             time.sleep(1)
 
@@ -146,6 +149,6 @@ class GameServer:
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
         gameapi_pb2_grpc.add_GameApiServicer_to_server(self.gameServer, server)
         server.add_insecure_port('[::]:'+str(PORT))
-        print("gRPC starting")
+        logger.info("gRPC starting")
         server.start()
         server.wait_for_termination()
