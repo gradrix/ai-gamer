@@ -11,8 +11,10 @@ os.chdir(root_dir)
 from console_client.consoleclient import ConsoleClient
 
 agentName = None
-if len(sys.argv) > 1:
+if (len(sys.argv) > 1 and sys.argv[1]):
     agentName = sys.argv[1]
+else:
+    agentName = 'ConsoleClient'
 
 client = ConsoleClient('localhost', 8080, agentName)
 client.start()

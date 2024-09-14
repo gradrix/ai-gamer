@@ -7,4 +7,4 @@
 
 #agentName=$1
 #python agent.py "$agentName"
-python ai_agent/agent.py test
+python3 ai_agent/agent.py test

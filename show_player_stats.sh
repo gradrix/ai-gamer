@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sqlite3 -readonly db/game_records.db -header -table '
+sqlite3 -readonly data/db/game_records.db -header -table '
 SELECT 
     name,
     played,

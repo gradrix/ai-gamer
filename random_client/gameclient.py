@@ -11,6 +11,7 @@ class GameClient:
     def __init__(self, host, port, agentName):
         self.client = GameEngineRpcClient(host, port)
         self.playerId = agentName
+        print('Starting game client as: '+self.playerId)
         self.__initKeepAliveRequestor()
         self.__register()
 

@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Debug: Server",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "start-server.py",
             "cwd": "${workspaceFolder}/game_server",
@@ -14,16 +14,33 @@
         },
         {
             "name": "Debug: AI Agent",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "program": "agent.py",
+            "program": "start-agent.py",
             "args": ["ai_agent"],
             "cwd": "${workspaceFolder}/ai_agent",
             "console": "integratedTerminal"
         },
         {
+            "name": "Debug: AI Agent (Docker)",
+            "type": "debugpy",
+            "request": "attach",
+            "preLaunchTask": "Start AI Agent Container",
+            "connect": {
+              "host": "127.0.0.1",
+              "port": 5678
+            },
+            "pathMappings": [
+              {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/app"
+              }
+            ],
+            "justMyCode":true
+        },
+        {
             "name": "Debug: Random Client",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "start-random-client.py",
             "args": ["Debug-Random-Agent"],
@@ -32,7 +49,7 @@
         },
         {
             "name": "Debug: Console Client",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "start-console-client.py",
             "args": ["Debug-Console-Agent"],

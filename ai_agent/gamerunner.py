@@ -17,25 +17,26 @@ class GameRunner:
         self.__register()
 
     def start(self):
-        self.nnController.initialize()
+        pass
+        # self.nnController.initialize()
 
-        while True:
-            canMove = self.client.canMove(self.playerId)
-            logger.info("Can move: " + str(canMove))
-            match canMove:
-                case PlayerStatus.UnregisteredPlayer:
-                    self.__register()
-                case PlayerStatus.Won:
-                    self.__gameEnded('I\'ve won!')
-                    self.nnController.won()
-                case PlayerStatus.Lost:
-                    self.__gameEnded('I\'ve lost :-/')
-                    self.nnController.lost()
-                case PlayerStatus.Draw:
-                    self.__gameEnded('It\'s a draw..')
-                    self.nnController.draw()
-                case PlayerStatus.CanMove:
-                    self.__makeSomeMove()
+        # while True:
+        #     canMove = self.client.canMove(self.playerId)
+        #     logger.info("Can move: " + str(canMove))
+        #     match canMove:
+        #         case PlayerStatus.UnregisteredPlayer:
+        #             self.__register()
+        #         case PlayerStatus.Won:
+        #             self.__gameEnded('I\'ve won!')
+        #             self.nnController.won()
+        #         case PlayerStatus.Lost:
+        #             self.__gameEnded('I\'ve lost :-/')
+        #             self.nnController.lost()
+        #         case PlayerStatus.Draw:
+        #             self.__gameEnded('It\'s a draw..')
+        #             self.nnController.draw()
+        #         case PlayerStatus.CanMove:
+        #             self.__makeSomeMove()
 
     def __register(self) -> bool:
         registration = self.client.registerPlayer(self.playerId)

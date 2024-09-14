@@ -30,6 +30,7 @@ REWARD = {
     'WON' : -1.0,       # Negative value as a reward
 }
 
+#@keras.saving.register_keras_serializable()
 def custom_loss(y_true, y_pred):
     # Create a loss multiplier, setting it high for incorrect moves
     loss_multiplier = tf.where(tf.equal(y_true, LABEL['INCORRECT']), 10.0, 1.0)
