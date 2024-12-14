@@ -26,8 +26,9 @@
             "type": "debugpy",
             "request": "attach",
             "preLaunchTask": "Start AI Agent Container",
+            "postDebugTask": "Stop AI Agent Container",
             "connect": {
-              "host": "127.0.0.1",
+              "host": "localhost",
               "port": 5678
             },
             "pathMappings": [
@@ -55,6 +56,24 @@
             "args": ["Debug-Console-Agent"],
             "cwd": "${workspaceFolder}/console_client",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug: Tests (Docker)",
+            "type": "debugpy",
+            "request": "attach",
+            "preLaunchTask": "Start Game Tests Container",
+            "postDebugTask": "Stop Game Tests Container",
+            "connect": {
+              "host": "localhost",
+              "port": 5678
+            },
+            "pathMappings": [
+              {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/app"
+              }
+            ],
+            "justMyCode":true
         }
     ]
 }

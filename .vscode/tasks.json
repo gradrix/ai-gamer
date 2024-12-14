@@ -4,7 +4,25 @@
       {
         "label": "Start AI Agent Container",
         "type": "shell",
-        "command": "./run_ai_agent_containerized.sh --debug",
+        "command": "./run_ai_agent_containerized.sh --debug && sleep 5",
+        "problemMatcher": []
+      },
+      {
+        "label": "Stop AI Agent Container",
+        "type": "shell",
+        "command": "docker stop ai_agent >/dev/null 2>&1",
+        "problemMatcher": []
+      },
+      {
+        "label": "Start Game Tests Container",
+        "type": "shell",
+        "command": "./run_tests.sh --debug && sleep 5",
+        "problemMatcher": []
+      },
+      {
+        "label": "Stop Game Tests Container",
+        "type": "shell",
+        "command": "docker stop game_tests >/dev/null 2>&1",
         "problemMatcher": []
       }
     ]

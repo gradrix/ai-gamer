@@ -7,14 +7,19 @@ RUN pip install debugpy
 WORKDIR /app
 
 # Copy the requirements.txt file to the container
-COPY ./ai_agent/requirements.txt .
+COPY ./game_server/requirements.txt ./game_server/
+COPY ./ai_agent/requirements.txt ./ai_agent/
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir pytest
+RUN pip install --no-cache-dir -r ./game_server/requirements.txt
+RUN pip install --no-cache-dir -r ./ai_agent/requirements.txt
 
 # Copy the rest of the application code to the container
-COPY ./ai_agent ./ai_agent
 COPY ./common ./common
+COPY ./game_server ./game_server
+COPY ./ai_agent ./ai_agent
+COPY ./tests ./tests
 
 # Expose the gRPC server's port
 EXPOSE 8080
@@ -22,5 +27,4 @@ EXPOSE 8080
 EXPOSE 5678
 
 # Specify the command to run your application
-CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client",  "ai_agent/network/neuralnetwork.py" ] 
-#"ai_agent/start-agent.py" 
+CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "pytest", "--collect-only", "tests/" ] 
