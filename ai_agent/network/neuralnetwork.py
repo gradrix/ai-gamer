@@ -18,6 +18,15 @@ batch_size = 64
 num_actions = 1000  # Number of possible moves
 input_shape = (100, 100, 1)
 
+# Reward system
+REWARD = {
+    'INCORRECT': -1.0,  # Negative reward for incorrect moves
+    'LOST': -1.0,       # Negative reward for losing
+    'MOVED': 0.0,       # No reward for a regular move
+    'DRAW': 0.5,        # Positive reward for a draw
+    'WON': 1.0,         # Positive reward for winning
+}
+
 class NeuralNetwork:
 
     def __init__(self, agentName):
@@ -46,9 +55,12 @@ class NeuralNetwork:
         model.add(tf.keras.layers.Dense(num_actions, activation='linear'))  # Outputs Q-values
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=alpha), loss='mse')
         return model
-    
-    def get_model(self):
-        return self.model
+
+    def predict(self, state):
+        return self.model.predict(state)
+
+    def train(self, state, target):
+        self.model.fit(state, target, epochs=1, verbose=0)
 
 class ReplayBuffer:
     def __init__(self, max_size):
@@ -66,8 +78,8 @@ class ReplayBuffer:
 
 class DQNAgent:
     def __init__(self, nn: NeuralNetwork):
-        self.model = nn.get_model()
-        self.target_model = nn.get_model()
+        self.model = nn.model
+        self.target_model = nn.model
         self.replay_buffer = ReplayBuffer(max_size=2000)
         self.epsilon = epsilon
         
