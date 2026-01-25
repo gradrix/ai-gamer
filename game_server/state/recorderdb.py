@@ -46,14 +46,14 @@ class RecorderDb:
             return -1
         
 
-    def createPlayer(self, playerName):
+    def createPlayer(self, playerName, is_ai=False):
         timestamp = currentTimestamp()
-        sql = ''' INSERT INTO players(name,createddate,lastonline)
-                VALUES(?,?,?) '''
+        sql = ''' INSERT INTO players(name,createddate,lastonline,is_ai)
+                VALUES(?,?,?,?) '''
         try:
             with self.lock:
                 db = self.conn.cursor()
-                db.execute(sql, (playerName, timestamp, timestamp))
+                db.execute(sql, (playerName, timestamp, timestamp, is_ai))
                 self.conn.commit()
                 return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:

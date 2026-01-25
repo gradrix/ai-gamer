@@ -20,11 +20,11 @@ input_shape = (100, 100, 1)
 
 # Reward system
 REWARD = {
-    'INCORRECT': -1.0,  # Negative reward for incorrect moves
-    'LOST': -1.0,       # Negative reward for losing
-    'MOVED': 0.0,       # No reward for a regular move
-    'DRAW': 0.5,        # Positive reward for a draw
-    'WON': 1.0,         # Positive reward for winning
+    'INCORRECT': -10.0,  # Very bad - agent should avoid at all costs
+    'LOST': -1.0,        # Bad - agent lost the game
+    'MOVED': 0.0,        # Neutral - standard move
+    'DRAW': 0.5,         # Good - better than losing
+    'WON': 1.0           # Very good - agent won the game
 }
 
 class NeuralNetwork:

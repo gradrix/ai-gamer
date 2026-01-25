@@ -14,10 +14,10 @@ class GameStateManager:
         self.game = Game(None, dict(), None, GameStatus.Created)
         self.moves = []
 
-    def registerPlayer(self, playerName: str):
+    def registerPlayer(self, playerName: str, is_ai: bool = False):
         player = self.db.getPlayer(playerName)
         if (player == None):
-            player = self.db.createPlayer(playerName)
+            player = self.db.createPlayer(playerName, is_ai)
         else:
             player.lastonline = currentTimestamp()
             logger.info('Loading existing player.')

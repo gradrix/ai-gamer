@@ -34,14 +34,18 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     def registerPlayer(self, request: gameapi_pb2.PlayerNameRequest, context):
         playerName = request.playerName
         logger.info('Registering player '+str(playerName) + ' ... ')
+        
+        # Detect if this is an AI player
+        is_ai = 'ai' in playerName.lower() or 'agent' in playerName.lower()
+        
         result = self.__validatePlayer(playerName)
         match result:
             case PlayerRegistration.Success:
-                player = self.state.registerPlayer(playerName)
+                player = self.state.registerPlayer(playerName, is_ai)
                 self.__syncPlayers()
                 logger.info('Newly registered with '+str(player.id)+'.')
             case PlayerRegistration.AlreadyRegistered:
-                player = self.state.registerPlayer(playerName)
+                player = self.state.registerPlayer(playerName, is_ai)
                 self.__syncPlayers()
                 logger.info('Already registered with id '+str(player.id)+'.')
             case PlayerRegistration.NoPlayerSlotsLeft:
@@ -49,7 +53,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
                 playersStr = ''
                 for player in players:
                     playersStr += str(player)+' '
-                logger.warning('No player slots available for ' +str(player.name)+ 'as we already have: '+playersStr)
+                logger.warning('No player slots available for ' +str(playerName)+ ' as we already have: '+playersStr)
         return codec.encodeRegisterPlayerResponse(result)
 
     def getPossibleMoves(self, request: EmptyRequest, context):

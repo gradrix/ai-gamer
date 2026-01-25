@@ -10,6 +10,7 @@ class Player:
     createddate: int
     lastonline: int
     status: PlayerStatus = PlayerStatus.Wait
+    is_ai: bool = False
 
     def __post_init__(self):
         self.refid = str(uuid.uuid4())
