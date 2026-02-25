@@ -104,6 +104,7 @@ class ModelManager:
         if self.epsilon > epsilon_min:
             self.epsilon *= epsilon_decay
 
+    padded_board = np.expand_dims(padded_board, axis=2)
         return padded_board_unb, padded_moves_unb, prediction
 
     def remember(self, state, action, reward, next_state, done):
@@ -193,7 +194,7 @@ class ModelManager:
 
     def _newModel(self):
         logger.info("Creating CNN DQN model for spatial learning.")
-        board_input = Input(shape=(MAX_GRID_SIZE, MAX_GRID_SIZE))
+        board_input = Input(shape=(MAX_GRID_SIZE, MAX_GRID_SIZE, 1))
         x = Conv2D(32, (3, 3), activation="relu", padding="same")(board_input)
         x = MaxPooling2D((2, 2))(x)
         x = Conv2D(64, (3, 3), activation="relu", padding="same")(x)
@@ -251,6 +252,7 @@ class ModelManager:
             )
             padded_board[:, -pad_width:] = width_encoding
 
+    padded_board = np.expand_dims(padded_board, axis=2)
         return padded_board
 
     def _padMoves(
