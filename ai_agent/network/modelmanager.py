@@ -104,7 +104,6 @@ class ModelManager:
         if self.epsilon > epsilon_min:
             self.epsilon *= epsilon_decay
 
-    padded_board = np.expand_dims(padded_board, axis=2)
         return padded_board_unb, padded_moves_unb, prediction
 
     def remember(self, state, action, reward, next_state, done):
@@ -252,7 +251,7 @@ class ModelManager:
             )
             padded_board[:, -pad_width:] = width_encoding
 
-    padded_board = np.expand_dims(padded_board, axis=2)
+        padded_board = np.expand_dims(padded_board, axis=2)
         return padded_board
 
     def _padMoves(
