@@ -35,10 +35,9 @@ class GameEngineRpcClient:
         request = codec.encodePlayerNameRequest(playerName)
         try:
             result = self.stub.canMove(request)
-        except:
-            result = PlayerStatus.Wait
-        finally:
             return codec.decodeCanMoveResponse(result)
+        except:
+            return PlayerStatus.Wait
 
     def move(self, playerName, index):
         request = codec.encodeMoveRequest(playerName, index)

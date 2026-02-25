@@ -6,14 +6,20 @@ from tensorflow.keras import layers
 from tensorflow.keras.models import load_model
 import random
 
+# Suppress TensorFlow info and warning logs to reduce verbosity
+tf.get_logger().setLevel(logging.ERROR)
+# Also suppress TensorFlow's progress bar output
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress INFO, WARNING, ERROR logs
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.FATAL)
+
 logger = logging.getLogger(__name__)
 
 # Hyperparameters
 gamma = 0.95  # Discount factor
 alpha = 0.001  # Learning rate
 epsilon = 1.0  # Exploration-exploitation trade-off
-epsilon_min = 0.01
-epsilon_decay = 0.995
+epsilon_min = 0.1  # Higher minimum to maintain some exploration
+epsilon_decay = 0.99  # Faster decay to shift to exploitation sooner
 batch_size = 64
 num_actions = 1000  # Number of possible moves
 input_shape = (100, 100, 1)
@@ -104,7 +110,7 @@ class DQNAgent:
             
             q_values = self.model.predict(state)
             q_values[0][action] = target  # Update the Q-value for the chosen action
-            
+
             self.model.fit(state, q_values, epochs=1, verbose=0)
 
         # Decay epsilon (less random exploration over time)

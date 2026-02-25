@@ -21,8 +21,8 @@ NO_VALUE = 0
 gamma = 0.95  # Discount factor
 alpha = 0.001  # Learning rate
 epsilon = 1.0  # Exploration-exploitation trade-off
-epsilon_min = 0.01
-epsilon_decay = 0.995
+epsilon_min = 0.1  # Higher minimum to maintain some exploration
+epsilon_decay = 0.99  # Faster decay to shift to exploitation sooner
 batch_size = 64
 
 # Reward system (fixed)
@@ -78,15 +78,13 @@ class ModelManager:
             prediction = np.random.randint(0, len(moves))
         else:
             # Best move (exploitation) - use main model for prediction
-            q_values = self.model.predict([padded_board, padded_moves])
-            prediction = np.argmax(q_values[0])
-            
-            # Convert from Q-value index to actual move index
-            predicted_move_index = int(prediction) // MOVE_VECTOR_LENGTH
-            if predicted_move_index < len(moves):
-                prediction = predicted_move_index
+            q_values = self.model.predict([padded_board, padded_moves], verbose=0)  # Suppress verbose output
+            # Only consider Q-values for the actual available moves to avoid invalid indices
+            valid_q_values = q_values[0][:len(moves)]  # Limit to number of actual moves
+            if len(valid_q_values) > 0:
+                prediction = np.argmax(valid_q_values)
             else:
-                prediction = 0 - predicted_move_index
+                prediction = 0  # Default to first move if no valid moves
 
         # Decay epsilon
         if self.epsilon > epsilon_min:
@@ -102,40 +100,58 @@ class ModelManager:
         """Train on a batch from replay buffer using DQN"""
         if len(self.replay_buffer) < batch_size:
             return
-        
+
         # Sample a batch from replay buffer
         minibatch = self.replay_buffer.sample(batch_size)
-        
+
         # Prepare batches
-        states = []
-        next_states = []
+        state_boards = []
+        state_moves = []
         targets = []
-        
+
         for state, action, reward, next_state, done in minibatch:
-            states.append(state)
-            next_states.append(next_state)
-            
+            # Extract board and moves from state (state is [board, moves])
+            state_board = state[0]
+            state_moves_tensor = state[1]
+
+            state_boards.append(state_board)
+            state_moves.append(state_moves_tensor)
+
             # Get current Q-values from main model
-            current_q = self.model.predict(state)
-            
+            current_q = self.model.predict([np.expand_dims(state_board, axis=0), np.expand_dims(state_moves_tensor, axis=0)])
+            current_q = current_q[0]  # Remove batch dimension
+
             # Calculate target Q-value
             if done:
-                target_q = reward
+                target = reward  # Terminal state: target is just the reward
             else:
                 # Use target network to calculate future Q-values
-                future_q = self.target_model.predict(next_state)
-                target_q = reward + gamma * np.amax(future_q[0])
-            
+                next_board = next_state[0]
+                next_moves = next_state[1]
+                future_q_values = self.target_model.predict([np.expand_dims(next_board, axis=0), np.expand_dims(next_moves, axis=0)])
+                future_q_max = np.amax(future_q_values[0])
+                target = reward + gamma * future_q_max  # Q-learning target
+
             # Update the Q-value for the action taken
-            current_q[0][action] = target_q
-            targets.append(current_q[0])
-        
+            target_q = np.copy(current_q)
+            if 0 <= action < len(target_q):
+                target_q[action] = target
+            else:
+                # Action index out of bounds, skip this sample
+                continue
+
+            targets.append(target_q)
+
+        if len(targets) == 0:
+            return
+
         # Convert to numpy arrays
-        states = np.array(states)
+        state_boards = np.array(state_boards)
+        state_moves = np.array(state_moves)
         targets = np.array(targets)
-        
+
         # Train the model
-        self.model.fit([states[:, 0], states[:, 1]], targets, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit([state_boards, state_moves], targets, batch_size=min(batch_size, len(targets)), epochs=1, verbose=0)
     
     def update_target_network(self):
         """Update target network with weights from main network"""

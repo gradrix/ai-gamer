@@ -1,35 +1,29 @@
 #!/bin/bash
 
 sqlite3 -readonly data/db/game_records.db -header -table '
-SELECT 
-    name,
-    played,
-    won,
-    lost,
-    draw,
-    ROUND(CAST(won AS DECIMAL) * 100.0 / CAST(played AS DECIMAL), 3) AS "rate %",
-    moves as "avg moves"
-FROM (
-    SELECT 
-        p.name,
-        COUNT(DISTINCT pg.gameid) AS played,
-        SUM(CASE WHEN g.status = 2 AND last_moves.playerid = p.id THEN 1 ELSE 0 END) AS won,
-        SUM(CASE WHEN g.status = 2 AND last_moves.playerid != p.id THEN 1 ELSE 0 END) AS lost,
-        SUM(CASE WHEN g.status = 3 THEN 1 ELSE 0 END) AS draw,
-        ROUND(AVG(steps), 2) AS moves
-    FROM players p
-    JOIN (
-        SELECT m.gameid, m.playerid, COUNT(m.playerid) steps
-        FROM moves m
-        GROUP BY m.gameid, m.playerid
-    ) pg ON pg.playerid = p.id 
-    LEFT JOIN (
-        SELECT m.gameid, m.playerid, MAX(m.idx) AS max_date
-        FROM moves m
-        GROUP BY m.gameid
-    ) last_moves ON last_moves.gameid = pg.gameid
-    LEFT JOIN games g ON g.id = last_moves.gameid
-    WHERE 1 = 1
-    GROUP BY p.id
-) s;
+SELECT
+    p.name,
+    COALESCE(stats.played, 0) as played,
+    COALESCE(stats.won, 0) as won,
+    COALESCE(stats.lost, 0) as lost,
+    COALESCE(stats.draw, 0) as draw,
+    CASE
+        WHEN COALESCE(stats.played, 0) > 0 THEN
+            ROUND(CAST(COALESCE(stats.won, 0) AS FLOAT) * 100.0 / CAST(COALESCE(stats.played, 0) AS FLOAT), 3)
+        ELSE 0
+    END AS "rate %",
+    0 as "avg moves"  -- Placeholder, calculating average moves would require more complex query
+FROM players p
+LEFT JOIN (
+    SELECT
+        playerid,
+        COUNT(*) as played,
+        SUM(CASE WHEN result = 1 THEN 1 ELSE 0 END) as won,
+        SUM(CASE WHEN result = 2 THEN 1 ELSE 0 END) as lost,
+        SUM(CASE WHEN result = 3 THEN 1 ELSE 0 END) as draw
+    FROM game_results
+    GROUP BY playerid
+) stats ON p.id = stats.playerid
+WHERE stats.played > 0  -- Only show players with recorded games
+ORDER BY stats.played DESC;
 '

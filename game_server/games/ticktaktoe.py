@@ -29,9 +29,21 @@ class TikTakToe(GameBase):
     requiredNumOfPlayers: int = 2
 
     def startNewGame(self, players: list[Player]):
+        # Ensure we have exactly 2 different players
+        if len(players) < 2:
+            return False
+
+        # Validate that we have 2 different players
+        if players[0].id == players[1].id:
+            # This shouldn't happen - same player assigned twice
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Attempted to start game with same player twice: {players[0].name} (ID: {players[0].id})")
+            return False
+
         self.__reset()
         self.syncPlayers(players)
-    
+
         if (self.player1.id == self.previousWinner):
             self.__assignPlayerFigures(True)
         elif (self.player2.id == self.previousWinner):

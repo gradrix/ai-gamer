@@ -26,6 +26,7 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
         self.state = GameStateManager()
         self.gameProgram: GameBase = gameProgram
         self.restarting = False
+        self.current_game_ended = False  # Flag to track if current game has been ended
         self.startNewGame()
         self.__checkForGameStatus()
         self.__initPlayerConnectionChecker()
@@ -65,24 +66,45 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
         return codec.encodeGetCurrentBoardResponse(result)
 
     def canMove(self, request: gameapi_pb2.PlayerNameRequest, context):
+        import time
+        start_time = time.time()
+
         self.__checkForGameStatus()
         playerName = request.playerName
-        
+
         if (self.state.hasGameEnded()):
-            self.state.endGame(self.state.playersList)
+            # Only end the game once per game cycle to prevent duplicate entries
+            if not self.current_game_ended:
+                with self.lock:  # Thread-safe access
+                    if not self.current_game_ended:
+                        self.state.endGame(self.state.playersList)
+                        self.current_game_ended = True
 
         if (self.state.game.status != GameStatus.Started or self.areEnoughPlayers() == False):
             result = PlayerStatus.Wait
         else:
             result = self.gameProgram.canMove(playerName)
+
+        end_time = time.time()
+        if (end_time - start_time) > 0.05:  # Log if it takes more than 50ms
+            logger.debug(f"canMove for {playerName} took {(end_time - start_time)*1000:.1f}ms")
+
         return codec.encodeCanMoveResponse(result)
 
     def move(self, request: gameapi_pb2.MoveRequest, context):
+        import time
+        start_time = time.time()
+
         result = self.gameProgram.move(request.playerName, request.index)
         moveResult = codec.encodeMoveResponse(result)
         if (result.status == MoveStatus.Success):
             move = Move(None, self.state.game.id, self.state.players[request.playerName].id, request.index, moveResult.move, currentTimestamp())
             self.state.addMove(move)
+
+        end_time = time.time()
+        if (end_time - start_time) > 0.05:  # Log if it takes more than 50ms
+            logger.debug(f"move for {request.playerName} took {(end_time - start_time)*1000:.1f}ms")
+
         return moveResult
 
     def keepAlive(self, request: gameapi_pb2.PlayerNameRequest, context):
@@ -95,8 +117,19 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
     def startNewGame(self):
         if (len(self.state.playersList) < self.gameProgram.requiredNumOfPlayers):
             return False
+
+        # Ensure we have the required number of unique players
+        seen_ids = set()
+        unique_players = []
+        for player in self.state.playersList:
+            if player.id not in seen_ids:
+                unique_players.append(player)
+                seen_ids.add(player.id)
+        if len(unique_players) < self.gameProgram.requiredNumOfPlayers:
+            return False  # Not enough unique players
+
         with self.lock:
-            started = self.gameProgram.startNewGame(self.state.playersList)
+            started = self.gameProgram.startNewGame(unique_players)
             if (started and not(self.state.isGameRunning())):
                 self.state.registerGame()
             return started
@@ -115,6 +148,8 @@ class GameRpcServer(gameapi_pb2_grpc.GameApiServicer):
             self.started = self.startNewGame()
             if (self.started):
                 self.restarting = False
+                # Reset the game ended flag for the new game
+                self.current_game_ended = False
 
     def __validatePlayer(self, playerName):
         if (self.state.doesPlayerExist(playerName)):

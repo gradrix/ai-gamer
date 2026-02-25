@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import os
 from common.rpc.rpcclient import GameEngineRpcClient
 from common.models.enums import PlayerStatus, MoveStatus, PlayerRegistration
 from .network.controller import Controller
@@ -19,6 +20,9 @@ class GameRunner:
     def start(self):
         self.nnController.initialize()
 
+        # Get delay from environment variable, default to 0.1 seconds
+        delay = float(os.getenv('AGENT_LOOP_DELAY', '0.1'))
+
         while True:
             canMove = self.client.canMove(self.playerId)
             logger.info("Can move: " + str(canMove))
@@ -36,6 +40,10 @@ class GameRunner:
                     self.nnController.draw()
                 case PlayerStatus.CanMove:
                     self.__makeSomeMove()
+
+            # Add configurable delay to prevent excessive polling and reduce CPU usage
+            if delay > 0:
+                time.sleep(delay)
 
     def __register(self) -> bool:
         registration = self.client.registerPlayer(self.playerId)
@@ -67,7 +75,8 @@ class GameRunner:
                 self.nnController.moved(predicted)
             elif (moveResult == MoveStatus.Incorrect):
                 self.nnController.incorrect()
-            time.sleep(3)
+            # Remove the delay to allow fast gameplay
+            # time.sleep(3)
 
     def __initKeepAliveRequestor(self):
         thread = threading.Thread(target=self.__keepAliveRequestor, args=())

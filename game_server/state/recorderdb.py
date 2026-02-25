@@ -97,8 +97,7 @@ class RecorderDb:
 
     def updateGame(self, game: Game):
         sql = ''' UPDATE games
-                SET  (status)
-                        = (?) 
+                SET status = ?
                 WHERE id = ? '''
         try:
             with self.lock:
@@ -125,6 +124,24 @@ class RecorderDb:
         except Error as e:
             logger.error("RecorderDb: Unable to add Moves: "+str(e))
             return -1
+
+    def recordGameResult(self, gameid, playerid, result):
+        """
+        Record the result of a game for a specific player.
+        result: 1 = Win, 2 = Loss, 3 = Draw
+        """
+        timestamp = currentTimestamp()
+        sql = ''' INSERT INTO game_results(gameid, playerid, result, timestamp)
+                VALUES(?,?,?,?) '''
+        try:
+            with self.lock:
+                db = self.conn.cursor()
+                db.execute(sql, (gameid, playerid, result, timestamp))
+                self.conn.commit()
+                return True
+        except Error as e:
+            logger.error("RecorderDb: Unable to record game result: "+str(e))
+            return False
 
     def addMove(self, move: Move):
         sql = ''' INSERT INTO moves(gameid,playerid,idx,move,date)

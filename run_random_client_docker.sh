@@ -20,6 +20,7 @@ docker run -d \
   --name random_client \
   --network host \
   -e PLAYER_NAME="RandomBot" \
+  -e CLIENT_LOOP_DELAY="0.0" \
   -e PYTHONUNBUFFERED=1 \
   random_client
 

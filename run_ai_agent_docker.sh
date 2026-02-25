@@ -26,6 +26,7 @@ docker run -d \
   -v $(pwd)/data/models:/app/data/models \
   -e PLAYER_NAME="AILearner" \
   -e LEARNING_MODE="true" \
+  -e AGENT_LOOP_DELAY="0.0" \
   -e PYTHONUNBUFFERED=1 \
   ai_agent
 

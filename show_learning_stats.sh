@@ -79,28 +79,34 @@ try:
         WHERE playerid = ?
         ORDER BY timestamp ASC
     ''', (ai_player_id,))
-    
+
     progress_data = cursor.fetchall()
-    
+
     if progress_data:
         print('📈 LEARNING PROGRESS')
         print('===================')
-        
+
         # Show progress table
         print('Timestamp                   Win Rate')
         print('-' * 45)
         for win_rate, timestamp in progress_data[-10:]:  # Show last 10 entries
-            date_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            try:
+                # Handle timestamp conversion - it might be in milliseconds
+                if timestamp > 1e10:  # If timestamp is in milliseconds
+                    timestamp /= 1000
+                date_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                date_str = f'Invalid timestamp: {timestamp}'
             print(f'{date_str}  {win_rate*100:.1f}%')
-        
+
         if len(progress_data) > 10:
             print(f'... and {len(progress_data) - 10} more entries')
-        
+
         # Calculate improvement
         initial_win_rate = progress_data[0][0] * 100
         current_win_rate = progress_data[-1][0] * 100
         improvement = current_win_rate - initial_win_rate
-        
+
         print('')
         print(f'Initial Win Rate: {initial_win_rate:.1f}%')
         print(f'Current Win Rate: {current_win_rate:.1f}%')
@@ -115,17 +121,32 @@ try:
         ORDER BY start_time DESC
         LIMIT 3
     ''', (ai_player_id,))
-    
+
     sessions = cursor.fetchall()
-    
+
     if sessions:
         print('🎓 RECENT TRAINING SESSIONS')
         print('==========================')
-        
+
         for i, session in enumerate(sessions):
-            start_time = datetime.fromtimestamp(session[0])
-            end_time = datetime.fromtimestamp(session[1]) if session[1] else 'Now'
-            
+            try:
+                # Handle timestamp conversion - it might be in milliseconds
+                start_timestamp = session[0]
+                if start_timestamp > 1e10:  # If timestamp is in milliseconds
+                    start_timestamp /= 1000
+                start_time = datetime.fromtimestamp(start_timestamp)
+
+                if session[1]:
+                    end_timestamp = session[1]
+                    if end_timestamp > 1e10:  # If timestamp is in milliseconds
+                        end_timestamp /= 1000
+                    end_time = datetime.fromtimestamp(end_timestamp)
+                else:
+                    end_time = 'Now'
+            except ValueError:
+                print(f'Session {i+1}: Invalid timestamps')
+                continue
+
             if session[1]:
                 duration = end_time - start_time if isinstance(end_time, datetime) else 'Ongoing'
                 improvement = ((session[3] - session[2]) * 100) if session[3] and session[2] else 0
@@ -142,7 +163,7 @@ try:
                 print(f'  Current Win Rate: Calculating...')
                 print(f'  Episodes: {session[4]}')
             print('')
-        
+
         if len(sessions) > 3:
             print(f'... and {len(sessions) - 3} older sessions')
     
@@ -155,20 +176,26 @@ try:
         ORDER BY g.date DESC
         LIMIT 5
     ''', (ai_player_id,))
-    
+
     recent_games = cursor.fetchall()
-    
+
     if recent_games:
         print('🎮 RECENT GAMES')
         print('==============')
-        
+
         result_map = {1: 'Win', 2: 'Loss', 3: 'Draw'}
-        
+
         for game in recent_games:
             game_id, timestamp, board_size, result = game
-            date_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            try:
+                # Handle timestamp conversion - it might be in milliseconds
+                if timestamp > 1e10:  # If timestamp is in milliseconds
+                    timestamp /= 1000
+                date_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                date_str = f'Invalid timestamp: {timestamp}'
             result_str = result_map.get(result, 'Unknown')
-            
+
             print(f'Game {game_id}: {date_str}')
             print(f'  Board Size: {board_size}x{board_size}')
             print(f'  Result: {result_str}')
