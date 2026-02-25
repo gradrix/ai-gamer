@@ -199,9 +199,13 @@ class ModelManager:
         x = Conv2D(64, (3, 3), activation="relu", padding="same")(x)
         x = MaxPooling2D((2, 2))(x)
         x = Flatten()(x)
+
+        moves_input = Input(shape=(GRID_AREA, ))
+        x = Concatenate()([x, moves_input])
         x = Dense(128, activation="relu")(x)
         q_values = Dense(GRID_AREA, activation="linear")(x)
-        model = Model(inputs=board_input, outputs=q_values)
+
+        model = Model(inputs=[board_input, moves_input], outputs=q_values)
         model.compile(optimizer=Adam(learning_rate=alpha), loss="mse")
         return model
 
