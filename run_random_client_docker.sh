@@ -17,8 +17,10 @@ docker build -t random_client -f ./random_client/Dockerfile .
 # Use host network to connect to game server on localhost
 echo "🐳 Starting random client container..."
 docker run -d \
+  --user $(id -u):$(id -g) \
   --name random_client \
   --network host \
+  -v $(pwd)/data/db:/app/data/db \
   -e PLAYER_NAME="RandomBot" \
   -e CLIENT_LOOP_DELAY="0.0" \
   -e PYTHONUNBUFFERED=1 \
