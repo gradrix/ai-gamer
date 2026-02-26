@@ -17,7 +17,7 @@ try:
     cursor = conn.cursor()
     
     # Get AI player ID using new schema
-    cursor.execute('SELECT id FROM players WHERE name = ? AND is_ai = TRUE', ('AI_Agent',))
+    cursor.execute('SELECT id FROM players WHERE name = ? AND is_ai = TRUE', ('AILearner',))
     ai_player = cursor.fetchone()
     
     if not ai_player:

@@ -7,11 +7,13 @@ echo "🛑 Stopping AI-Gamer Learning System..."
 
 # Stop all containers
 echo "Stopping containers..."
-docker stop game_server random_client ai_agent >/dev/null 2>&1
+docker stop game_server ai_agent >/dev/null 2>&1
+docker stop $(docker ps -q --filter name=random_client) >/dev/null 2>&1
 
 # Remove containers
 echo "Removing containers..."
-docker rm game_server random_client ai_agent >/dev/null 2>&1
+docker rm game_server ai_agent >/dev/null 2>&1
+docker rm $(docker ps -aq --filter name=random_client) >/dev/null 2>&1
 
 # Stop monitoring
 echo "Stopping monitoring..."
