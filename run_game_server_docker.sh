@@ -20,9 +20,10 @@ mkdir -p data/logs
 # Run the game server container with proper volume mounting
 echo "🐳 Starting game server container..."
 docker run -d \
+  --user $(id -u):$(id -g) \
   --name game_server \
   -p 8080:8080 \
-  -v $(pwd)/data/db:/app/data/db \
+  -v \$(pwd)/data/db:/app/data/db \
   -v $(pwd)/data/logs:/app/data/logs \
   -e PYTHONUNBUFFERED=1 \
   game_server
