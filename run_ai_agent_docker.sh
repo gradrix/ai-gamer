@@ -20,10 +20,12 @@ mkdir -p data/models
 # Use host network to connect to game server on localhost
 echo "🐳 Starting AI agent container..."
 docker run -d \
+  --user $(id -u):$(id -g) \
   --name ai_agent \
   --network host \
   --gpus all \
   -v $(pwd)/data/models:/app/data/models \
+  -v $(pwd)/data/db:/app/data/db \
   -e PLAYER_NAME="AILearner" \
   -e LEARNING_MODE="true" \
   -e AGENT_LOOP_DELAY="0.0" \
