@@ -73,7 +73,7 @@ class GameClient:
     
     def __gameEnded(self, message):
         print(str(message) + '. Waiting for the game to be started again..')
-        time.sleep(0.1)
+        time.sleep(0.01)
 
     def __initKeepAliveRequestor(self):
         thread = threading.Thread(target=self.__keepAliveRequestor, args=())

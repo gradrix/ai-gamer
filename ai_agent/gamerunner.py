@@ -59,7 +59,7 @@ class GameRunner:
             
     def __gameEnded(self, message):
         logger.debug(str(message) + '. Waiting for the game to be started again..')
-        time.sleep(0.1)
+        time.sleep(0.01)
 
     def __makeSomeMove(self):
         grid = self.client.getCurrentBoard()
