@@ -23,7 +23,7 @@ docker run -d \
   --user $(id -u):$(id -g) \
   --name game_server \
   -p 8080:8080 \
-  -v \$(pwd)/data/db:/app/data/db \
+  -v \"${PWD}/data/db:/app/data/db\" \
   -v $(pwd)/data/logs:/app/data/logs \
   -e PYTHONUNBUFFERED=1 \
   game_server
