@@ -12,15 +12,18 @@ from common.timehelpers import currentTimestamp
 
 logger = logging.getLogger(__name__)
 
-RECORDER_DB = 'data/db/game_records.db'
+RECORDER_DB = "data/db/game_records.db"
+
 
 class RecorderDb:
-
     conn = None
 
     def __init__(self):
         try:
             self.conn = sqlite3.connect(RECORDER_DB, check_same_thread=False)
+            self.conn.execute("PRAGMA journal_mode = WAL;")
+            self.conn.execute("PRAGMA synchronous = NORMAL;")
+            self.conn.commit()
             self.lock = threading.Lock()
             self.__create_tables()
         except Error as e:
@@ -28,28 +31,29 @@ class RecorderDb:
             raise e
 
     def __del__(self):
-        if (self.conn):
+        if self.conn:
             self.conn.close()
 
     def getPlayer(self, playerName):
-        sql = ''' SELECT * FROM players
-                WHERE name = ? '''
+        sql = """ SELECT * FROM players
+                WHERE name = ? """
         try:
             db = self.conn.cursor()
             db.execute(sql, (playerName,))
             result = db.fetchone()
-            if (result == None):
+            if result == None:
                 return None
-            return Player(int(result[0]), str(result[1]), int(result[2]), int(result[3]))
+            return Player(
+                int(result[0]), str(result[1]), int(result[2]), int(result[3])
+            )
         except Error as e:
-            logger.error("RecorderDb: Unable to get User: "+str(e))
+            logger.error("RecorderDb: Unable to get User: " + str(e))
             return -1
-        
 
     def createPlayer(self, playerName, is_ai=False):
         timestamp = currentTimestamp()
-        sql = ''' INSERT INTO players(name,createddate,lastonline,is_ai)
-                VALUES(?,?,?,?) '''
+        sql = """ INSERT INTO players(name,createddate,lastonline,is_ai)
+                VALUES(?,?,?,?) """
         try:
             with self.lock:
                 db = self.conn.cursor()
@@ -57,13 +61,13 @@ class RecorderDb:
                 self.conn.commit()
                 return Player(int(db.lastrowid), playerName, timestamp, timestamp)
         except Error as e:
-            logger.error("RecorderDb: Unable to add User: "+str(e))
+            logger.error("RecorderDb: Unable to add User: " + str(e))
             return -1
 
     def updatePlayer(self, player):
-        sql = ''' UPDATE players
+        sql = """ UPDATE players
                 SET lastonline = (?)
-                WHERE id = ?'''
+                WHERE id = ?"""
         try:
             with self.lock:
                 db = self.conn.cursor()
@@ -71,13 +75,13 @@ class RecorderDb:
                 self.conn.commit()
                 return player
         except Error as e:
-            logger.error("RecorderDb: Unable to update Player: "+str(e))
+            logger.error("RecorderDb: Unable to update Player: " + str(e))
             return -1
 
-    def createGame(self, retries = 10):
+    def createGame(self, retries=10):
         timestamp = currentTimestamp()
-        sql = ''' INSERT INTO games(date,status)
-                VALUES(?,?) '''
+        sql = """ INSERT INTO games(date,status)
+                VALUES(?,?) """
         for attempt in range(retries):
             try:
                 with self.lock:
@@ -92,13 +96,13 @@ class RecorderDb:
                     continue
                 else:
                     # Other error or out of retries: give up
-                    logger.error("RecorderDb: Unable to add Game: "+str(e))
+                    logger.error("RecorderDb: Unable to add Game: " + str(e))
                     return -1
 
     def updateGame(self, game: Game):
-        sql = ''' UPDATE games
+        sql = """ UPDATE games
                 SET status = ?
-                WHERE id = ? '''
+                WHERE id = ? """
         try:
             with self.lock:
                 db = self.conn.cursor()
@@ -106,15 +110,15 @@ class RecorderDb:
                 self.conn.commit()
                 return game
         except Error as e:
-            logger.error("RecorderDb: Unable to update Game: "+str(e))
+            logger.error("RecorderDb: Unable to update Game: " + str(e))
             return -1
 
     def addMoves(self, moves: list[Move]):
         data = []
         for idx, move in enumerate(moves):
             data.append((move.gameid, move.playerid, idx, move.move, move.date))
-        sql = ''' INSERT INTO moves(gameid,playerid,idx,move,date)
-                VALUES(?,?,?,?,?) '''
+        sql = """ INSERT INTO moves(gameid,playerid,idx,move,date)
+                VALUES(?,?,?,?,?) """
         try:
             with self.lock:
                 db = self.conn.cursor()
@@ -122,7 +126,7 @@ class RecorderDb:
                 self.conn.commit()
                 return True
         except Error as e:
-            logger.error("RecorderDb: Unable to add Moves: "+str(e))
+            logger.error("RecorderDb: Unable to add Moves: " + str(e))
             return -1
 
     def recordGameResult(self, gameid, playerid, result):
@@ -131,8 +135,8 @@ class RecorderDb:
         result: 1 = Win, 2 = Loss, 3 = Draw
         """
         timestamp = currentTimestamp()
-        sql = ''' INSERT INTO game_results(gameid, playerid, result, timestamp)
-                VALUES(?,?,?,?) '''
+        sql = """ INSERT INTO game_results(gameid, playerid, result, timestamp)
+                VALUES(?,?,?,?) """
         try:
             with self.lock:
                 db = self.conn.cursor()
@@ -140,31 +144,50 @@ class RecorderDb:
                 self.conn.commit()
                 return True
         except Error as e:
-            logger.error("RecorderDb: Unable to record game result: "+str(e))
+            logger.error("RecorderDb: Unable to record game result: " + str(e))
             return False
 
     def addMove(self, move: Move):
-        sql = ''' INSERT INTO moves(gameid,playerid,idx,move,date)
-                VALUES(?,?,?,?,?) '''
+        sql = """ INSERT INTO moves(gameid,playerid,idx,move,date)
+                VALUES(?,?,?,?,?) """
         try:
             with self.lock:
                 db = self.conn.cursor()
-                db.execute(sql, (move.gameid, move.playerid, move.idx, move.move, self.__currentTime()))
+                db.execute(
+                    sql,
+                    (
+                        move.gameid,
+                        move.playerid,
+                        move.idx,
+                        move.move,
+                        self.__currentTime(),
+                    ),
+                )
                 self.conn.commit()
                 return db.lastrowid
         except Error as e:
-            logger.error("RecorderDb: Unable to add Move: "+str(e))
+            logger.error("RecorderDb: Unable to add Move: " + str(e))
             return -1
 
     def __create_tables(self):
-        sqlFile = open(str(pathlib.Path().resolve())+'/game_server/state/game_records_schema.sql')
+        logger.info("RecorderDb: Creating tables from schema")
+        schema_path = (
+            str(pathlib.Path().resolve()) + "/game_server/state/game_records_schema.sql"
+        )
         try:
+            sqlFile = open(schema_path)
             sql = sqlFile.read()
+            sqlFile.close()
             db = self.conn.cursor()
             db.executescript(sql)
+            self.conn.commit()
+            logger.info("RecorderDb: Tables created successfully")
+            self.conn.execute("PRAGMA wal_checkpoint(FULL);")
+            self.conn.commit()
+            logger.info("RecorderDb: WAL checkpointed")
         except Error as e:
-            logger.critical(e)
+            logger.error(f"RecorderDb: Tables create error: {e}")
             raise e
-        finally:
-            sqlFile.close()
-            
+        except FileNotFoundError as e:
+            logger.error(f"RecorderDb: Schema file not found: {e}")
+            raise e
