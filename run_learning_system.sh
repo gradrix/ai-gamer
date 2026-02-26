@@ -33,7 +33,7 @@ echo "2️⃣ Starting Random Client..."
 if is_container_running "random_client"; then
     echo "⚠️  Random client is already running"
 else
-    ./run_random_client_docker.sh &
+    for i in {1..10}; do ./run_random_client_docker.sh & sleep 1; done
     sleep 3
 fi
 
