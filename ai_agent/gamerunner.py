@@ -20,8 +20,8 @@ class GameRunner:
     def start(self):
         self.nnController.initialize()
 
-        # Get delay from environment variable, default to 0.1 seconds
-        delay = float(os.getenv('AGENT_LOOP_DELAY', '0.1'))
+        # Get delay from environment variable, default to 0.0 seconds
+        delay = float(os.getenv('AGENT_LOOP_DELAY', '0.0'))
 
         while True:
             canMove = self.client.canMove(self.playerId)
