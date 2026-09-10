@@ -173,65 +173,29 @@ class TikTakToe(GameBase):
 
     def checkForWinner(self):
         self.stillCouldHaveWinner = False
-        score = { 
-            X: 0,
-            O: 0,
-            E: 0,
-            "prev": None
-        }
+        h = self.ySize
+        w = self.xSize
+        k = self.scoreLineLength
+        winners = set()
+        possible = False
 
-        #check vertically
-        for x in range(0, self.xSize):
-            self.__clearAllScores(score)  
-            for y in range(0, self.ySize):  
-                winner = self.__calculateScore(score, self.grid[y][x])
-                if (winner != None):
-                    return winner
+        for y in range(h):
+            for x in range(w):
+                for dx, dy in ((1, 0), (0, 1), (1, 1), (1, -1)):
+                    ex = x + (k - 1) * dx
+                    ey = y + (k - 1) * dy
+                    if not (0 <= ex < w and 0 <= ey < h):
+                        continue
+                    line = [self.grid[y + i * dy][x + i * dx] for i in range(k)]
+                    for figure in (X, O):
+                        if all(v == figure for v in line):
+                            winners.add(figure)
+                        if all(v in (E, figure) for v in line):
+                            possible = True
 
-        #check horizontally
-        for y in range(0, self.ySize):  
-            self.__clearAllScores(score)  
-            for x in range(0, self.xSize):
-                winner = self.__calculateScore(score, self.grid[y][x])
-                if (winner != None):
-                    return winner
-
-        #check diagonally (bottom left -> top right)
-        xStart = 0
-        yStart = self.ySize - 1
-        while(xStart < self.xSize):            
-            self.__clearAllScores(score)  
-            x = xStart
-            y = yStart
-            while (y < self.ySize and x < self.xSize):             
-                winner = self.__calculateScore(score, self.grid[y][x])
-                if (winner != None):
-                    return winner
-                x += 1
-                y += 1
-            if (yStart > 0):
-                yStart -= 1
-            elif (yStart == 0):
-                xStart += 1
-
-        #check diagonally (bottom left -> top right)
-        yStart = 0
-        xStart = 0
-        while(yStart < self.ySize):       
-            self.__clearAllScores(score)  
-            x = xStart
-            y = yStart
-            while (y >= 0 and x < self.xSize):   
-                winner = self.__calculateScore(score, self.grid[y][x])
-                if (winner != None):
-                    return winner
-                x += 1
-                y -= 1
-            if (yStart < self.ySize):
-                yStart += 1
-            elif (yStart == self.ySize - 1):
-                xStart += 1
-
+        self.stillCouldHaveWinner = possible
+        if winners:
+            return next(iter(winners))
         return False
 
     def __reset(self):
@@ -250,35 +214,6 @@ class TikTakToe(GameBase):
         self.hasEnded = True        
         player.status = endStatus
         return endStatus
-
-    def __clearAllScores(self, score):
-        score[X] = 0
-        score[O] = 0
-        score[E] = 0
-
-    def __clearOponentScore(self, score, playerFigure):
-        if (playerFigure == X and score[O] > 0):
-            score[O] = 0
-            score[E] = 0
-        elif (playerFigure == O and score[X] > 0):
-            score[X] = 0
-            score[E] = 0
-
-    def __calculateScore(self, score, newFigure):
-        prevFigure = score["prev"]
-        score[newFigure] += 1
-
-        if (prevFigure != newFigure):
-            self.__clearOponentScore(score, newFigure)
-
-        if (newFigure != E and score[newFigure] >= self.scoreLineLength):
-            return newFigure
-        elif ((prevFigure != None and score[prevFigure] + score[E] >= self.scoreLineLength)
-                or (score[newFigure] + score[E] >= self.scoreLineLength)):
-            self.stillCouldHaveWinner = True
-
-        score["prev"] = newFigure
-        return None
 
     def __assignPlayerFigures(self, player1IsFirst: bool):
         if (player1IsFirst):
