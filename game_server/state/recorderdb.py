@@ -113,21 +113,25 @@ class RecorderDb:
             logger.error("RecorderDb: Unable to update Game: " + str(e))
             return -1
 
-    def addMoves(self, moves: list[Move]):
+    def addMoves(self, moves: list[Move]) -> int | bool:
         data = []
         for idx, move in enumerate(moves):
             data.append((move.gameid, move.playerid, idx, move.move, move.date))
         sql = """ INSERT INTO moves(gameid,playerid,idx,move,date)
                 VALUES(?,?,?,?,?) """
-        try:
-            with self.lock:
+        with self.lock:
+            try:
                 db = self.conn.cursor()
                 db.executemany(sql, data)
                 self.conn.commit()
                 return True
-        except Error as e:
-            logger.error("RecorderDb: Unable to add Moves: " + str(e))
-            return -1
+            except Error as e:
+                logger.error("RecorderDb: Unable to add Moves: " + str(e))
+                try:
+                    self.conn.rollback()
+                except Error:
+                    pass
+                return -1
 
     def recordGameResult(self, gameid, playerid, result):
         """
